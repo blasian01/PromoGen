@@ -1,9 +1,176 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useMemo, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { RoundedBox, Float } from "@react-three/drei";
 import * as THREE from "three";
+
+/* ─── Social media icon SVG paths (drawn to canvas) ─── */
+type SocialPlatform = {
+    name: string;
+    color: string;
+    draw: (ctx: CanvasRenderingContext2D, size: number) => void;
+};
+
+const SOCIALS: SocialPlatform[] = [
+    {
+        name: "Instagram",
+        color: "#E1306C",
+        draw: (ctx, s) => {
+            const p = s * 0.2;
+            const w = s - p * 2;
+            const r = w * 0.25;
+            // Rounded rect
+            ctx.beginPath();
+            ctx.moveTo(p + r, p);
+            ctx.lineTo(p + w - r, p);
+            ctx.quadraticCurveTo(p + w, p, p + w, p + r);
+            ctx.lineTo(p + w, p + w - r);
+            ctx.quadraticCurveTo(p + w, p + w, p + w - r, p + w);
+            ctx.lineTo(p + r, p + w);
+            ctx.quadraticCurveTo(p, p + w, p, p + w - r);
+            ctx.lineTo(p, p + r);
+            ctx.quadraticCurveTo(p, p, p + r, p);
+            ctx.closePath();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = s * 0.06;
+            ctx.stroke();
+            // Circle
+            ctx.beginPath();
+            ctx.arc(s / 2, s / 2, w * 0.26, 0, Math.PI * 2);
+            ctx.stroke();
+            // Dot
+            ctx.beginPath();
+            ctx.arc(p + w * 0.75, p + w * 0.25, s * 0.04, 0, Math.PI * 2);
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+        },
+    },
+    {
+        name: "TikTok",
+        color: "#00f2ea",
+        draw: (ctx, s) => {
+            ctx.fillStyle = "#fff";
+            ctx.font = `bold ${s * 0.55}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("♪", s / 2, s / 2);
+            // Second offset for TikTok style
+            ctx.fillStyle = "rgba(255,0,80,0.5)";
+            ctx.fillText("♪", s / 2 + s * 0.03, s / 2 - s * 0.02);
+        },
+    },
+    {
+        name: "YouTube",
+        color: "#FF0000",
+        draw: (ctx, s) => {
+            const cx = s / 2, cy = s / 2;
+            // Rounded rect background
+            const w = s * 0.56, h = s * 0.38;
+            const r = h * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(cx - w / 2 + r, cy - h / 2);
+            ctx.lineTo(cx + w / 2 - r, cy - h / 2);
+            ctx.quadraticCurveTo(cx + w / 2, cy - h / 2, cx + w / 2, cy - h / 2 + r);
+            ctx.lineTo(cx + w / 2, cy + h / 2 - r);
+            ctx.quadraticCurveTo(cx + w / 2, cy + h / 2, cx + w / 2 - r, cy + h / 2);
+            ctx.lineTo(cx - w / 2 + r, cy + h / 2);
+            ctx.quadraticCurveTo(cx - w / 2, cy + h / 2, cx - w / 2, cy + h / 2 - r);
+            ctx.lineTo(cx - w / 2, cy - h / 2 + r);
+            ctx.quadraticCurveTo(cx - w / 2, cy - h / 2, cx - w / 2 + r, cy - h / 2);
+            ctx.closePath();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = s * 0.04;
+            ctx.stroke();
+            // Play triangle
+            ctx.beginPath();
+            ctx.moveTo(cx - s * 0.07, cy - s * 0.1);
+            ctx.lineTo(cx + s * 0.12, cy);
+            ctx.lineTo(cx - s * 0.07, cy + s * 0.1);
+            ctx.closePath();
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+        },
+    },
+    {
+        name: "X",
+        color: "#ffffff",
+        draw: (ctx, s) => {
+            ctx.fillStyle = "#fff";
+            ctx.font = `bold ${s * 0.5}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("𝕏", s / 2, s / 2);
+        },
+    },
+    {
+        name: "LinkedIn",
+        color: "#0A66C2",
+        draw: (ctx, s) => {
+            const p = s * 0.22;
+            const w = s - p * 2;
+            const r = w * 0.15;
+            // Rounded rect
+            ctx.beginPath();
+            ctx.moveTo(p + r, p);
+            ctx.lineTo(p + w - r, p);
+            ctx.quadraticCurveTo(p + w, p, p + w, p + r);
+            ctx.lineTo(p + w, p + w - r);
+            ctx.quadraticCurveTo(p + w, p + w, p + w - r, p + w);
+            ctx.lineTo(p + r, p + w);
+            ctx.quadraticCurveTo(p, p + w, p, p + w - r);
+            ctx.lineTo(p, p + r);
+            ctx.quadraticCurveTo(p, p, p + r, p);
+            ctx.closePath();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = s * 0.04;
+            ctx.stroke();
+            // "in" text
+            ctx.fillStyle = "#fff";
+            ctx.font = `bold ${s * 0.32}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("in", s / 2, s / 2 + s * 0.02);
+        },
+    },
+    {
+        name: "Facebook",
+        color: "#1877F2",
+        draw: (ctx, s) => {
+            // Circle
+            ctx.beginPath();
+            ctx.arc(s / 2, s / 2, s * 0.32, 0, Math.PI * 2);
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = s * 0.04;
+            ctx.stroke();
+            // f
+            ctx.fillStyle = "#fff";
+            ctx.font = `bold ${s * 0.4}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("f", s / 2, s / 2 + s * 0.02);
+        },
+    },
+];
+
+/* ─── Create icon texture from canvas ─── */
+function createIconTexture(social: SocialPlatform): THREE.CanvasTexture {
+    const size = 128;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+
+    // Transparent background
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw the icon
+    social.draw(ctx, size);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
 
 /* ─── iPhone Model ─── */
 function IPhone({ index, total }: { index: number; total: number }) {
@@ -19,7 +186,6 @@ function IPhone({ index, total }: { index: number; total: number }) {
         groupRef.current.position.z = Math.sin(t) * radius;
         groupRef.current.position.y = Math.sin(t * 1.5) * 0.3;
 
-        // Phones face outward and tilt slightly
         groupRef.current.rotation.y = -t + Math.PI / 2;
         groupRef.current.rotation.x = Math.sin(t * 0.8) * 0.08;
         groupRef.current.rotation.z = Math.cos(t * 0.6) * 0.05;
@@ -91,7 +257,7 @@ function IPhone({ index, total }: { index: number; total: number }) {
                             roughness={0.1}
                         />
                     </mesh>
-                    <mesh position={[0, 0, 0]}>
+                    <mesh>
                         <cylinderGeometry args={[0.06, 0.06, 0.04, 16]} />
                         <meshStandardMaterial
                             color="#0a0a0a"
@@ -115,102 +281,102 @@ function IPhone({ index, total }: { index: number; total: number }) {
     );
 }
 
-/* ─── Social Icon Particle ─── */
-const SOCIAL_COLORS = [
-    "#E1306C", // Instagram
-    "#000000", // TikTok (will use white for visibility)
-    "#FF0000", // YouTube
-    "#1DA1F2", // Twitter
-    "#0A66C2", // LinkedIn
-    "#1877F2", // Facebook
-    "#7DD3FC", // PromoGen accent
-];
-
-const SOCIAL_SYMBOLS = ["◆", "▲", "●", "■", "◇", "▼"];
-
-function SocialParticle({ index, total }: { index: number; total: number }) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const speed = useMemo(() => 0.4 + Math.random() * 0.6, []);
-    const xOffset = useMemo(() => (Math.random() - 0.5) * 3, []);
-    const zOffset = useMemo(() => (Math.random() - 0.5) * 2, []);
-    const delay = useMemo(() => (index / total) * 8, [index, total]);
-    const colorIdx = useMemo(() => index % SOCIAL_COLORS.length, [index]);
-    const scale = useMemo(() => 0.04 + Math.random() * 0.06, []);
-    const wobbleSpeed = useMemo(() => 1 + Math.random() * 2, []);
-
-    useFrame(({ clock }) => {
-        if (!meshRef.current) return;
-        const t = clock.getElapsedTime() * speed + delay;
-        const cycle = ((t % 8) / 8); // 0 to 1 cycle
-
-        meshRef.current.position.x = xOffset + Math.sin(t * wobbleSpeed) * 0.3;
-        meshRef.current.position.y = -4 + cycle * 10; // flow from -4 to +6
-        meshRef.current.position.z = zOffset + Math.cos(t * wobbleSpeed * 0.7) * 0.2;
-
-        // Fade in/out at edges
-        const mat = meshRef.current.material as THREE.MeshStandardMaterial;
-        const fade = Math.sin(cycle * Math.PI);
-        mat.opacity = fade * 0.7;
-        mat.emissiveIntensity = fade * 0.5;
-
-        meshRef.current.rotation.z = t * 0.5;
-        meshRef.current.rotation.y = t * 0.3;
-    });
-
-    const color = SOCIAL_COLORS[colorIdx];
-
-    return (
-        <mesh ref={meshRef}>
-            <icosahedronGeometry args={[scale, 0]} />
-            <meshStandardMaterial
-                color={color}
-                emissive={color}
-                emissiveIntensity={0.3}
-                transparent
-                opacity={0.5}
-            />
-        </mesh>
-    );
-}
-
-/* ─── Social Icon Rings — orbit around the stream ─── */
-function SocialRing({
+/* ─── Social Icon Sprite (always faces camera) ─── */
+function SocialIcon({
     index,
     total,
+    textures,
 }: {
     index: number;
     total: number;
+    textures: THREE.CanvasTexture[];
 }) {
-    const ref = useRef<THREE.Mesh>(null);
-    const offset = (index / total) * Math.PI * 2;
-    const yBase = useMemo(() => -2 + (index / total) * 6, [index, total]);
-    const color = SOCIAL_COLORS[index % SOCIAL_COLORS.length];
-    const radius = useMemo(() => 0.8 + Math.random() * 0.6, []);
-    const speed = useMemo(() => 0.5 + Math.random() * 0.5, []);
-    const size = useMemo(() => 0.06 + Math.random() * 0.04, []);
+    const spriteRef = useRef<THREE.Sprite>(null);
+    const socialIdx = index % SOCIALS.length;
+    const texture = textures[socialIdx];
+    const social = SOCIALS[socialIdx];
+
+    const speed = useMemo(() => 0.3 + Math.random() * 0.5, []);
+    const xOffset = useMemo(() => (Math.random() - 0.5) * 3.5, []);
+    const zOffset = useMemo(() => (Math.random() - 0.5) * 2.5, []);
+    const delay = useMemo(() => (index / total) * 10, [index, total]);
+    const wobbleSpeed = useMemo(() => 0.8 + Math.random() * 1.5, []);
+    const size = useMemo(() => 0.2 + Math.random() * 0.2, []);
+
+    const material = useMemo(() => {
+        return new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.8,
+            color: new THREE.Color(social.color),
+            blending: THREE.AdditiveBlending,
+        });
+    }, [texture, social.color]);
 
     useFrame(({ clock }) => {
-        if (!ref.current) return;
-        const t = clock.getElapsedTime() * speed + offset;
-        ref.current.position.x = Math.cos(t) * radius;
-        ref.current.position.z = Math.sin(t) * radius;
-        ref.current.position.y = yBase + Math.sin(t * 2) * 0.3;
-        ref.current.rotation.x = t;
-        ref.current.rotation.z = t * 0.5;
+        if (!spriteRef.current) return;
+        const t = clock.getElapsedTime() * speed + delay;
+        const cycle = (t % 10) / 10;
+
+        spriteRef.current.position.x = xOffset + Math.sin(t * wobbleSpeed) * 0.4;
+        spriteRef.current.position.y = -5 + cycle * 12;
+        spriteRef.current.position.z = zOffset + Math.cos(t * wobbleSpeed * 0.7) * 0.3;
+
+        // Fade in/out at edges
+        const fade = Math.sin(cycle * Math.PI);
+        spriteRef.current.material.opacity = fade * 0.85;
+
+        // Gentle rotation via scale pulse
+        const pulse = 1 + Math.sin(t * 2) * 0.1;
+        spriteRef.current.scale.set(size * pulse, size * pulse, 1);
     });
 
-    return (
-        <mesh ref={ref}>
-            <octahedronGeometry args={[size, 0]} />
-            <meshStandardMaterial
-                color={color}
-                emissive={color}
-                emissiveIntensity={0.6}
-                transparent
-                opacity={0.8}
-            />
-        </mesh>
-    );
+    return <sprite ref={spriteRef} material={material} scale={[size, size, 1]} />;
+}
+
+/* ─── Orbiting social icon (circles around the phones) ─── */
+function OrbitingIcon({
+    index,
+    total,
+    textures,
+}: {
+    index: number;
+    total: number;
+    textures: THREE.CanvasTexture[];
+}) {
+    const spriteRef = useRef<THREE.Sprite>(null);
+    const socialIdx = index % SOCIALS.length;
+    const texture = textures[socialIdx];
+    const social = SOCIALS[socialIdx];
+
+    const offset = (index / total) * Math.PI * 2;
+    const yBase = useMemo(() => -1.5 + (index / total) * 4, [index, total]);
+    const radius = useMemo(() => 1.2 + Math.random() * 1.5, []);
+    const speed = useMemo(() => 0.4 + Math.random() * 0.4, []);
+    const size = useMemo(() => 0.25 + Math.random() * 0.15, []);
+
+    const material = useMemo(() => {
+        return new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.9,
+            color: new THREE.Color(social.color),
+            blending: THREE.AdditiveBlending,
+        });
+    }, [texture, social.color]);
+
+    useFrame(({ clock }) => {
+        if (!spriteRef.current) return;
+        const t = clock.getElapsedTime() * speed + offset;
+        spriteRef.current.position.x = Math.cos(t) * radius;
+        spriteRef.current.position.z = Math.sin(t) * radius;
+        spriteRef.current.position.y = yBase + Math.sin(t * 2) * 0.4;
+
+        const pulse = 1 + Math.sin(t * 3) * 0.08;
+        spriteRef.current.scale.set(size * pulse, size * pulse, 1);
+    });
+
+    return <sprite ref={spriteRef} material={material} scale={[size, size, 1]} />;
 }
 
 /* ─── Glow beam — vertical light shaft ─── */
@@ -238,10 +404,22 @@ function DataBeam() {
     );
 }
 
+/* ─── Texture loader hook ─── */
+function useIconTextures() {
+    const textures = useMemo(() => {
+        if (typeof document === "undefined") return [];
+        return SOCIALS.map((s) => createIconTexture(s));
+    }, []);
+    return textures;
+}
+
 /* ─── Main Scene ─── */
 function Scene() {
-    const particleCount = 40;
-    const ringCount = 18;
+    const textures = useIconTextures();
+    const streamCount = 30;
+    const orbitCount = 14;
+
+    if (textures.length === 0) return null;
 
     return (
         <>
@@ -262,14 +440,14 @@ function Scene() {
             {/* Data stream beam */}
             <DataBeam />
 
-            {/* Flowing particles */}
-            {Array.from({ length: particleCount }).map((_, i) => (
-                <SocialParticle key={`p-${i}`} index={i} total={particleCount} />
+            {/* Flowing social icons (bottom to top stream) */}
+            {Array.from({ length: streamCount }).map((_, i) => (
+                <SocialIcon key={`s-${i}`} index={i} total={streamCount} textures={textures} />
             ))}
 
-            {/* Orbiting icon shapes */}
-            {Array.from({ length: ringCount }).map((_, i) => (
-                <SocialRing key={`r-${i}`} index={i} total={ringCount} />
+            {/* Orbiting social icons (circling the phones) */}
+            {Array.from({ length: orbitCount }).map((_, i) => (
+                <OrbitingIcon key={`o-${i}`} index={i} total={orbitCount} textures={textures} />
             ))}
         </>
     );
