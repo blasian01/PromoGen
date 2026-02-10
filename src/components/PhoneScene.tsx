@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { RoundedBox, Float } from "@react-three/drei";
+import { useRef, useMemo, useEffect, useState, Suspense } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { Float } from "@react-three/drei";
 import * as THREE from "three";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
 /* ─── Social media icon SVG paths (drawn to canvas) ─── */
 type SocialPlatform = {
@@ -20,7 +21,6 @@ const SOCIALS: SocialPlatform[] = [
             const p = s * 0.2;
             const w = s - p * 2;
             const r = w * 0.25;
-            // Rounded rect
             ctx.beginPath();
             ctx.moveTo(p + r, p);
             ctx.lineTo(p + w - r, p);
@@ -35,11 +35,9 @@ const SOCIALS: SocialPlatform[] = [
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = s * 0.06;
             ctx.stroke();
-            // Circle
             ctx.beginPath();
             ctx.arc(s / 2, s / 2, w * 0.26, 0, Math.PI * 2);
             ctx.stroke();
-            // Dot
             ctx.beginPath();
             ctx.arc(p + w * 0.75, p + w * 0.25, s * 0.04, 0, Math.PI * 2);
             ctx.fillStyle = "#fff";
@@ -55,7 +53,6 @@ const SOCIALS: SocialPlatform[] = [
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText("♪", s / 2, s / 2);
-            // Second offset for TikTok style
             ctx.fillStyle = "rgba(255,0,80,0.5)";
             ctx.fillText("♪", s / 2 + s * 0.03, s / 2 - s * 0.02);
         },
@@ -65,7 +62,6 @@ const SOCIALS: SocialPlatform[] = [
         color: "#FF0000",
         draw: (ctx, s) => {
             const cx = s / 2, cy = s / 2;
-            // Rounded rect background
             const w = s * 0.56, h = s * 0.38;
             const r = h * 0.3;
             ctx.beginPath();
@@ -82,7 +78,6 @@ const SOCIALS: SocialPlatform[] = [
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = s * 0.04;
             ctx.stroke();
-            // Play triangle
             ctx.beginPath();
             ctx.moveTo(cx - s * 0.07, cy - s * 0.1);
             ctx.lineTo(cx + s * 0.12, cy);
@@ -110,7 +105,6 @@ const SOCIALS: SocialPlatform[] = [
             const p = s * 0.22;
             const w = s - p * 2;
             const r = w * 0.15;
-            // Rounded rect
             ctx.beginPath();
             ctx.moveTo(p + r, p);
             ctx.lineTo(p + w - r, p);
@@ -125,7 +119,6 @@ const SOCIALS: SocialPlatform[] = [
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = s * 0.04;
             ctx.stroke();
-            // "in" text
             ctx.fillStyle = "#fff";
             ctx.font = `bold ${s * 0.32}px sans-serif`;
             ctx.textAlign = "center";
@@ -137,13 +130,11 @@ const SOCIALS: SocialPlatform[] = [
         name: "Facebook",
         color: "#1877F2",
         draw: (ctx, s) => {
-            // Circle
             ctx.beginPath();
             ctx.arc(s / 2, s / 2, s * 0.32, 0, Math.PI * 2);
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = s * 0.04;
             ctx.stroke();
-            // f
             ctx.fillStyle = "#fff";
             ctx.font = `bold ${s * 0.4}px sans-serif`;
             ctx.textAlign = "center";
@@ -160,22 +151,38 @@ function createIconTexture(social: SocialPlatform): THREE.CanvasTexture {
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext("2d")!;
-
-    // Transparent background
     ctx.clearRect(0, 0, size, size);
-
-    // Draw the icon
     social.draw(ctx, size);
-
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
     return texture;
 }
 
-/* ─── iPhone Model ─── */
+/* ─── iPhone 17 Pro Max (STL model) ─── */
 function IPhone({ index, total }: { index: number; total: number }) {
     const groupRef = useRef<THREE.Group>(null);
     const offset = (index / total) * Math.PI * 2;
+    const geometry = useLoader(STLLoader, "/models/iPhone_17_Pro_Max.stl");
+
+    // Center and scale the STL geometry on first load
+    const processedGeometry = useMemo(() => {
+        const geo = geometry.clone();
+        geo.computeBoundingBox();
+        const box = geo.boundingBox!;
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        geo.translate(-center.x, -center.y, -center.z);
+
+        // Scale to fit — target height of ~2.2 units
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 2.2 / maxDim;
+        geo.scale(scale, scale, scale);
+
+        geo.computeVertexNormals();
+        return geo;
+    }, [geometry]);
 
     useFrame(({ clock }) => {
         if (!groupRef.current) return;
@@ -194,86 +201,16 @@ function IPhone({ index, total }: { index: number; total: number }) {
     return (
         <group ref={groupRef}>
             <Float speed={2} rotationIntensity={0.1} floatIntensity={0.3}>
-                {/* Phone body */}
-                <RoundedBox args={[1.1, 2.2, 0.1]} radius={0.12} smoothness={8}>
+                <mesh geometry={processedGeometry}>
                     <meshPhysicalMaterial
-                        color="#1a1a1a"
-                        metalness={0.8}
-                        roughness={0.15}
+                        color="#3a3a3e"
+                        metalness={0.7}
+                        roughness={0.18}
                         clearcoat={1}
-                        clearcoatRoughness={0.1}
-                    />
-                </RoundedBox>
-
-                {/* Screen */}
-                <RoundedBox
-                    args={[0.95, 2.0, 0.005]}
-                    radius={0.08}
-                    smoothness={4}
-                    position={[0, 0, 0.053]}
-                >
-                    <meshStandardMaterial
-                        color="#000000"
-                        emissive="#0a1628"
-                        emissiveIntensity={0.4}
-                        metalness={0.2}
-                        roughness={0.1}
-                    />
-                </RoundedBox>
-
-                {/* Screen content glow */}
-                <RoundedBox
-                    args={[0.85, 1.8, 0.001]}
-                    radius={0.06}
-                    smoothness={4}
-                    position={[0, 0, 0.057]}
-                >
-                    <meshStandardMaterial
-                        color="#111827"
-                        emissive="#7DD3FC"
-                        emissiveIntensity={0.08}
-                        transparent
-                        opacity={0.6}
-                    />
-                </RoundedBox>
-
-                {/* Dynamic island */}
-                <RoundedBox
-                    args={[0.35, 0.1, 0.002]}
-                    radius={0.05}
-                    smoothness={4}
-                    position={[0, 0.85, 0.056]}
-                >
-                    <meshStandardMaterial color="#000000" />
-                </RoundedBox>
-
-                {/* Camera bump */}
-                <group position={[-0.25, 0.85, -0.055]}>
-                    <mesh>
-                        <cylinderGeometry args={[0.12, 0.12, 0.03, 16]} />
-                        <meshPhysicalMaterial
-                            color="#222"
-                            metalness={0.9}
-                            roughness={0.1}
-                        />
-                    </mesh>
-                    <mesh>
-                        <cylinderGeometry args={[0.06, 0.06, 0.04, 16]} />
-                        <meshStandardMaterial
-                            color="#0a0a0a"
-                            emissive="#1a1a3a"
-                            emissiveIntensity={0.3}
-                        />
-                    </mesh>
-                </group>
-
-                {/* Side button */}
-                <mesh position={[0.56, 0.3, 0]}>
-                    <boxGeometry args={[0.02, 0.25, 0.04]} />
-                    <meshPhysicalMaterial
-                        color="#2a2a2a"
-                        metalness={0.9}
-                        roughness={0.2}
+                        clearcoatRoughness={0.05}
+                        envMapIntensity={1.2}
+                        emissive="#1a2a3a"
+                        emissiveIntensity={0.15}
                     />
                 </mesh>
             </Float>
@@ -424,11 +361,12 @@ function Scene() {
     return (
         <>
             {/* Lighting */}
-            <ambientLight intensity={0.15} />
-            <directionalLight position={[5, 5, 5]} intensity={0.6} color="#ffffff" />
-            <directionalLight position={[-3, 3, -3]} intensity={0.3} color="#7DD3FC" />
-            <pointLight position={[0, -3, 0]} intensity={0.5} color="#7DD3FC" distance={8} />
-            <pointLight position={[0, 4, 0]} intensity={0.3} color="#38BDF8" distance={6} />
+            <ambientLight intensity={0.35} />
+            <directionalLight position={[5, 5, 5]} intensity={0.8} color="#ffffff" />
+            <directionalLight position={[-3, 3, -3]} intensity={0.4} color="#7DD3FC" />
+            <directionalLight position={[0, -2, -4]} intensity={0.3} color="#38BDF8" />
+            <pointLight position={[0, -3, 0]} intensity={0.6} color="#7DD3FC" distance={8} />
+            <pointLight position={[0, 4, 0]} intensity={0.4} color="#38BDF8" distance={6} />
 
             {/* iPhones */}
             <group position={[0, 0.5, 0]}>
@@ -469,7 +407,9 @@ export default function PhoneScene() {
                 dpr={[1, 2]}
                 gl={{ antialias: true, alpha: true }}
             >
-                <Scene />
+                <Suspense fallback={null}>
+                    <Scene />
+                </Suspense>
             </Canvas>
         </div>
     );
