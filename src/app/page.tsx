@@ -32,28 +32,28 @@ const FEATURES = [
     icon: Globe,
     title: "Multi-Account Publishing",
     description:
-      "Connect all your social accounts and publish to every platform simultaneously. One click, everywhere at once.",
+      "Connect every social account across all your projects and publish everywhere at once. No more switching tabs.",
     tag: "PUBLISH",
   },
   {
     icon: Building2,
     title: "Multi-Project Workspaces",
     description:
-      "Manage multiple SaaS businesses, brands, or clients from a single unified dashboard with isolated workspaces.",
+      "Running three SaaS apps? Keep each one in its own workspace with separate accounts, analytics, and content.",
     tag: "ORGANIZE",
   },
   {
     icon: Sparkles,
     title: "AI Ad Generation",
     description:
-      "Transform static product photos into cinematic video ads using state-of-the-art generative AI. Zero production costs.",
+      "Drop in a screenshot of your product and get a scroll-stopping video ad back. No design skills, no freelancers.",
     tag: "CREATE",
   },
   {
     icon: Video,
     title: "AI UGC Creation",
     description:
-      "Generate authentic user-generated-style content with AI. Realistic, scroll-stopping videos that convert.",
+      "Generate realistic user-style content with AI. The kind of authentic videos that actually convert — without hiring creators.",
     tag: "GENERATE",
   },
 ];
@@ -63,21 +63,21 @@ const STEPS = [
     number: "01",
     title: "Connect",
     description:
-      "Link your social accounts and organize them into project workspaces.",
+      "Link your social accounts for each project. Takes about 60 seconds.",
     icon: Zap,
   },
   {
     number: "02",
     title: "Create",
     description:
-      "Use AI to generate ads, UGC content, or craft your own posts with our editor.",
+      "Generate ads, UGC, or write your own posts. AI handles the heavy lifting.",
     icon: Sparkles,
   },
   {
     number: "03",
     title: "Publish",
     description:
-      "Push content to all connected platforms simultaneously with one click.",
+      "Hit publish once — your content goes live across every connected platform.",
     icon: Send,
   },
 ];
@@ -85,28 +85,27 @@ const STEPS = [
 const PRICING = [
   {
     name: "Starter",
-    price: "29",
-    description: "For solopreneurs and small projects",
+    price: "19",
+    description: "For your first project",
     features: [
       "3 social accounts",
       "1 project workspace",
       "50 AI generations / mo",
+      "Post scheduling",
       "Basic analytics",
-      "Schedule posts",
     ],
     cta: "Start Free Trial",
     popular: false,
   },
   {
     name: "Pro",
-    price: "79",
-    description: "For growing teams and agencies",
+    price: "49",
+    description: "For devs shipping multiple products",
     features: [
       "15 social accounts",
       "5 project workspaces",
       "500 AI generations / mo",
       "Advanced analytics",
-      "Team collaboration",
       "Priority support",
       "Custom branding",
     ],
@@ -114,20 +113,18 @@ const PRICING = [
     popular: true,
   },
   {
-    name: "Enterprise",
-    price: "249",
-    description: "For large organizations",
+    name: "Scale",
+    price: "99",
+    description: "For prolific builders",
     features: [
       "Unlimited accounts",
       "Unlimited workspaces",
       "Unlimited AI generations",
-      "White-label solution",
-      "Dedicated account manager",
+      "API access",
+      "Priority support",
       "Custom integrations",
-      "SLA guarantee",
-      "SSO & advanced security",
     ],
-    cta: "Contact Sales",
+    cta: "Start Free Trial",
     popular: false,
   },
 ];
@@ -383,9 +380,9 @@ export default function LandingPage() {
                 lineHeight: 1.7,
               }}
             >
-              Manage all your social accounts, publish everywhere at once, and
-              create AI-powered ads and UGC — built for teams running multiple
-              projects.
+              Manage social accounts across all your projects, publish everywhere
+              at once, and create AI-powered ads and UGC — built for solo devs
+              shipping fast.
             </p>
 
             <div
@@ -1413,7 +1410,7 @@ export default function LandingPage() {
               }}
             >
               SOC 2 compliant. End-to-end encryption. Your data never leaves
-              your control. Built for teams that take security seriously.
+              your control. Built for builders who take security seriously.
             </p>
             <div
               style={{
@@ -1626,7 +1623,7 @@ export default function LandingPage() {
                 }}
               >
                 <Users style={{ width: 12, height: 12 }} />
-                Built for modern teams
+                Built for indie devs
               </div>
             </div>
           </div>

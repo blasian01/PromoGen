@@ -12,9 +12,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "PromoGen | Your Social Command Center",
   description:
-    "Manage all your social accounts, publish everywhere at once, and create AI-powered ads and UGC content — all from one platform built for modern SaaS teams.",
+    "One platform to manage social accounts across all your projects. Publish everywhere at once, generate AI ads and UGC — built for solo devs shipping fast.",
   keywords:
-    "social media management, multi-account posting, AI ads, UGC creator, social scheduler, SaaS tools, content automation",
+    "social media management, indie dev tools, multi-account posting, AI ads, UGC creator, solopreneur, SaaS marketing, content automation",
 };
 
 export default function RootLayout({
