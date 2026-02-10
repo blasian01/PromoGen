@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useState, Suspense } from "react";
+import { useRef, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { Float } from "@react-three/drei";
+import { Float, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
@@ -158,12 +158,22 @@ function createIconTexture(social: SocialPlatform): THREE.CanvasTexture {
     return texture;
 }
 
-/* ─── iPhone 17 Pro Max (STL model) ─── */
+/* ─── iPhone 17 Pro Max (STL model with titanium finish) ─── */
 function IPhone({ index, total }: { index: number; total: number }) {
     const groupRef = useRef<THREE.Group>(null);
     const offset = (index / total) * Math.PI * 2;
     const geometry = useLoader(STLLoader, "/models/iPhone_17_Pro_Max.stl");
     const screenTexture = useLoader(THREE.TextureLoader, "/models/phone_screen.png");
+
+    // Titanium color variants — like real iPhone color options
+    const colorVariant = useMemo(() => {
+        const variants = [
+            { body: "#4A4A50", emissive: "#2a3040", name: "Natural Titanium" },
+            { body: "#2C2C30", emissive: "#1a1a2e", name: "Black Titanium" },
+            { body: "#5C5C62", emissive: "#3a3a4e", name: "White Titanium" },
+        ];
+        return variants[index % variants.length];
+    }, [index]);
 
     // Center, orient upright, and scale the STL geometry
     const { processedGeometry, screenDims } = useMemo(() => {
@@ -174,41 +184,31 @@ function IPhone({ index, total }: { index: number; total: number }) {
         box.getCenter(center);
         geo.translate(-center.x, -center.y, -center.z);
 
-        // Measure dimensions
         const size = new THREE.Vector3();
         box.getSize(size);
 
-        // The phone's longest dimension should be Y (upright).
-        // Determine which axis is longest and rotate accordingly.
+        // Rotate longest axis to Y (upright)
         const dims = [
             { axis: "x", val: size.x },
             { axis: "y", val: size.y },
             { axis: "z", val: size.z },
         ].sort((a, b) => b.val - a.val);
 
-        const longest = dims[0].axis;
-        const middle = dims[1].axis;
-        const shortest = dims[2].axis;
-
-        // Rotate so longest axis → Y, shortest → Z (depth)
-        if (longest === "x") {
-            geo.rotateZ(Math.PI / 2); // X → Y
-        } else if (longest === "z") {
-            geo.rotateX(Math.PI / 2); // Z → Y
+        if (dims[0].axis === "x") {
+            geo.rotateZ(Math.PI / 2);
+        } else if (dims[0].axis === "z") {
+            geo.rotateX(Math.PI / 2);
         }
 
-        // After rotation, recompute
         geo.computeBoundingBox();
         const newBox = geo.boundingBox!;
         const newSize = new THREE.Vector3();
         newBox.getSize(newSize);
-
-        // Re-center after rotation
         const newCenter = new THREE.Vector3();
         newBox.getCenter(newCenter);
         geo.translate(-newCenter.x, -newCenter.y, -newCenter.z);
 
-        // If depth (Z) is larger than width (X), rotate 90° around Y
+        // Ensure width (X) > depth (Z)
         if (newSize.z > newSize.x) {
             geo.rotateY(Math.PI / 2);
             geo.computeBoundingBox();
@@ -219,7 +219,15 @@ function IPhone({ index, total }: { index: number; total: number }) {
             fixBox.getSize(newSize);
         }
 
-        // Scale to target height of ~2.2
+        // Flip 180° so camera bump is at top (model was upside down)
+        geo.rotateZ(Math.PI);
+        geo.computeBoundingBox();
+        const flipBox = geo.boundingBox!;
+        const flipCenter = new THREE.Vector3();
+        flipBox.getCenter(flipCenter);
+        geo.translate(-flipCenter.x, -flipCenter.y, -flipCenter.z);
+
+        // Scale to target height
         const targetHeight = 2.2;
         const scale = targetHeight / newSize.y;
         geo.scale(scale, scale, scale);
@@ -228,14 +236,13 @@ function IPhone({ index, total }: { index: number; total: number }) {
         const finalBox = geo.boundingBox!;
         const finalSize = new THREE.Vector3();
         finalBox.getSize(finalSize);
-
         geo.computeVertexNormals();
 
         return {
             processedGeometry: geo,
             screenDims: {
-                width: finalSize.x * 0.85,
-                height: finalSize.y * 0.9,
+                width: finalSize.x * 0.98,
+                height: finalSize.y * 0.98,
                 depth: finalSize.z,
             },
         };
@@ -250,35 +257,53 @@ function IPhone({ index, total }: { index: number; total: number }) {
         groupRef.current.position.z = Math.sin(t) * radius;
         groupRef.current.position.y = Math.sin(t * 1.5) * 0.3;
 
+        // Face outward from center
         groupRef.current.rotation.y = -t + Math.PI / 2;
-        groupRef.current.rotation.x = Math.sin(t * 0.8) * 0.08;
-        groupRef.current.rotation.z = Math.cos(t * 0.6) * 0.05;
+        groupRef.current.rotation.x = Math.sin(t * 0.8) * 0.06;
+        groupRef.current.rotation.z = Math.cos(t * 0.6) * 0.04;
     });
 
     return (
         <group ref={groupRef}>
-            <Float speed={2} rotationIntensity={0.1} floatIntensity={0.3}>
-                {/* Phone body */}
+            <Float speed={2} rotationIntensity={0.08} floatIntensity={0.2}>
+                {/* Phone body — titanium finish */}
                 <mesh geometry={processedGeometry}>
                     <meshPhysicalMaterial
-                        color="#3a3a3e"
-                        metalness={0.7}
-                        roughness={0.18}
-                        clearcoat={1}
-                        clearcoatRoughness={0.05}
-                        envMapIntensity={1.2}
-                        emissive="#1a2a3a"
-                        emissiveIntensity={0.15}
+                        color={colorVariant.body}
+                        metalness={0.92}
+                        roughness={0.22}
+                        clearcoat={0.8}
+                        clearcoatRoughness={0.15}
+                        envMapIntensity={1.5}
+                        emissive={colorVariant.emissive}
+                        emissiveIntensity={0.1}
+                        reflectivity={0.9}
                     />
                 </mesh>
 
-                {/* Screen overlay — textured plane on front face */}
+                {/* Screen glow base (subtle backlight under texture) */}
+                <mesh position={[0, 0, screenDims.depth / 2 + 0.0005]}>
+                    <planeGeometry args={[screenDims.width, screenDims.height]} />
+                    <meshStandardMaterial
+                        color="#ffffff"
+                        emissive="#4488cc"
+                        emissiveIntensity={0.3}
+                        transparent
+                        opacity={0.4}
+                    />
+                </mesh>
+
+                {/* Screen texture overlay */}
                 <mesh position={[0, 0, screenDims.depth / 2 + 0.001]}>
                     <planeGeometry args={[screenDims.width, screenDims.height]} />
-                    <meshBasicMaterial
+                    <meshStandardMaterial
                         map={screenTexture}
+                        emissive="#ffffff"
+                        emissiveIntensity={0.15}
+                        emissiveMap={screenTexture}
                         transparent
-                        opacity={0.95}
+                        opacity={0.92}
+                        toneMapped={false}
                     />
                 </mesh>
             </Float>
@@ -286,7 +311,7 @@ function IPhone({ index, total }: { index: number; total: number }) {
     );
 }
 
-/* ─── Social Icon Sprite (always faces camera) ─── */
+/* ─── Social Icon Sprite — straight bottom-to-top flow ─── */
 function SocialIcon({
     index,
     total,
@@ -302,63 +327,19 @@ function SocialIcon({
     const social = SOCIALS[socialIdx];
 
     const speed = useMemo(() => 0.3 + Math.random() * 0.5, []);
-    const xOffset = useMemo(() => (Math.random() - 0.5) * 3.5, []);
-    const zOffset = useMemo(() => (Math.random() - 0.5) * 2.5, []);
     const delay = useMemo(() => (index / total) * 10, [index, total]);
-    const wobbleSpeed = useMemo(() => 0.8 + Math.random() * 1.5, []);
-    const size = useMemo(() => 0.2 + Math.random() * 0.2, []);
+    const wobbleSpeed = useMemo(() => 0.6 + Math.random() * 1.2, []);
+    const size = useMemo(() => 0.3 + Math.random() * 0.3, []);
 
-    const material = useMemo(() => {
-        return new THREE.SpriteMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.8,
-            color: new THREE.Color(social.color),
-            blending: THREE.AdditiveBlending,
-        });
-    }, [texture, social.color]);
-
-    useFrame(({ clock }) => {
-        if (!spriteRef.current) return;
-        const t = clock.getElapsedTime() * speed + delay;
-        const cycle = (t % 10) / 10;
-
-        spriteRef.current.position.x = xOffset + Math.sin(t * wobbleSpeed) * 0.4;
-        spriteRef.current.position.y = -5 + cycle * 12;
-        spriteRef.current.position.z = zOffset + Math.cos(t * wobbleSpeed * 0.7) * 0.3;
-
-        // Fade in/out at edges
-        const fade = Math.sin(cycle * Math.PI);
-        spriteRef.current.material.opacity = fade * 0.85;
-
-        // Gentle rotation via scale pulse
-        const pulse = 1 + Math.sin(t * 2) * 0.1;
-        spriteRef.current.scale.set(size * pulse, size * pulse, 1);
-    });
-
-    return <sprite ref={spriteRef} material={material} scale={[size, size, 1]} />;
-}
-
-/* ─── Orbiting social icon (circles around the phones) ─── */
-function OrbitingIcon({
-    index,
-    total,
-    textures,
-}: {
-    index: number;
-    total: number;
-    textures: THREE.CanvasTexture[];
-}) {
-    const spriteRef = useRef<THREE.Sprite>(null);
-    const socialIdx = index % SOCIALS.length;
-    const texture = textures[socialIdx];
-    const social = SOCIALS[socialIdx];
-
-    const offset = (index / total) * Math.PI * 2;
-    const yBase = useMemo(() => -1.5 + (index / total) * 4, [index, total]);
-    const radius = useMemo(() => 1.2 + Math.random() * 1.5, []);
-    const speed = useMemo(() => 0.4 + Math.random() * 0.4, []);
-    const size = useMemo(() => 0.25 + Math.random() * 0.15, []);
+    // Place icons in the visible area, spread across the scene
+    // Keep out of the phone orbit center (radius ~2.2 around origin)
+    const lane = useMemo(() => {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 3.5 + Math.random() * 3.5; // outside phone orbit
+        const x = Math.cos(angle) * dist;
+        const z = Math.sin(angle) * dist;
+        return { x, z };
+    }, []);
 
     const material = useMemo(() => {
         return new THREE.SpriteMaterial({
@@ -372,12 +353,19 @@ function OrbitingIcon({
 
     useFrame(({ clock }) => {
         if (!spriteRef.current) return;
-        const t = clock.getElapsedTime() * speed + offset;
-        spriteRef.current.position.x = Math.cos(t) * radius;
-        spriteRef.current.position.z = Math.sin(t) * radius;
-        spriteRef.current.position.y = yBase + Math.sin(t * 2) * 0.4;
+        const t = clock.getElapsedTime() * speed + delay;
+        const cycle = (t % 10) / 10;
 
-        const pulse = 1 + Math.sin(t * 3) * 0.08;
+        // Straight vertical movement with gentle horizontal wobble
+        spriteRef.current.position.x = lane.x + Math.sin(t * wobbleSpeed) * 0.3;
+        spriteRef.current.position.y = -5 + cycle * 14;
+        spriteRef.current.position.z = lane.z;
+
+        // Fade in/out at edges
+        const fade = Math.sin(cycle * Math.PI);
+        spriteRef.current.material.opacity = fade * 0.9;
+
+        const pulse = 1 + Math.sin(t * 2) * 0.08;
         spriteRef.current.scale.set(size * pulse, size * pulse, 1);
     });
 
@@ -421,20 +409,30 @@ function useIconTextures() {
 /* ─── Main Scene ─── */
 function Scene() {
     const textures = useIconTextures();
-    const streamCount = 30;
-    const orbitCount = 14;
+    const streamCount = 36;
 
     if (textures.length === 0) return null;
 
     return (
         <>
+            {/* Environment map for realistic reflections on titanium */}
+            <Environment preset="city" />
+
             {/* Lighting */}
-            <ambientLight intensity={0.35} />
-            <directionalLight position={[5, 5, 5]} intensity={0.8} color="#ffffff" />
+            <ambientLight intensity={0.3} />
+            <directionalLight position={[5, 5, 5]} intensity={0.9} color="#ffffff" />
             <directionalLight position={[-3, 3, -3]} intensity={0.4} color="#7DD3FC" />
-            <directionalLight position={[0, -2, -4]} intensity={0.3} color="#38BDF8" />
-            <pointLight position={[0, -3, 0]} intensity={0.6} color="#7DD3FC" distance={8} />
-            <pointLight position={[0, 4, 0]} intensity={0.4} color="#38BDF8" distance={6} />
+            <directionalLight position={[0, -2, -4]} intensity={0.25} color="#38BDF8" />
+            <pointLight position={[0, -3, 0]} intensity={0.5} color="#7DD3FC" distance={8} />
+            <pointLight position={[0, 4, 0]} intensity={0.35} color="#38BDF8" distance={6} />
+            {/* Rim light for edge definition */}
+            <spotLight
+                position={[-4, 2, -3]}
+                intensity={0.6}
+                angle={0.5}
+                penumbra={0.8}
+                color="#7DD3FC"
+            />
 
             {/* iPhones */}
             <group position={[0, 0.5, 0]}>
@@ -446,14 +444,9 @@ function Scene() {
             {/* Data stream beam */}
             <DataBeam />
 
-            {/* Flowing social icons (bottom to top stream) */}
+            {/* Social icons — bottom to top only, in side lanes */}
             {Array.from({ length: streamCount }).map((_, i) => (
                 <SocialIcon key={`s-${i}`} index={i} total={streamCount} textures={textures} />
-            ))}
-
-            {/* Orbiting social icons (circling the phones) */}
-            {Array.from({ length: orbitCount }).map((_, i) => (
-                <OrbitingIcon key={`o-${i}`} index={i} total={orbitCount} textures={textures} />
             ))}
         </>
     );
