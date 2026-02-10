@@ -241,8 +241,8 @@ function IPhone({ index, total }: { index: number; total: number }) {
         return {
             processedGeometry: geo,
             screenDims: {
-                width: finalSize.x * 0.98,
-                height: finalSize.y * 0.98,
+                width: finalSize.x * 0.75,
+                height: finalSize.y * 0.88,
                 depth: finalSize.z,
             },
         };
@@ -281,28 +281,40 @@ function IPhone({ index, total }: { index: number; total: number }) {
                     />
                 </mesh>
 
-                {/* Screen glow base (subtle backlight under texture) */}
-                <mesh position={[0, 0, screenDims.depth / 2 + 0.0005]}>
-                    <planeGeometry args={[screenDims.width, screenDims.height]} />
-                    <meshStandardMaterial
-                        color="#ffffff"
-                        emissive="#4488cc"
-                        emissiveIntensity={0.3}
-                        transparent
-                        opacity={0.4}
-                    />
-                </mesh>
-
-                {/* Screen texture overlay */}
+                {/* Screen texture overlay with rounded corners via alpha map */}
                 <mesh position={[0, 0, screenDims.depth / 2 + 0.001]}>
                     <planeGeometry args={[screenDims.width, screenDims.height]} />
                     <meshStandardMaterial
                         map={screenTexture}
+                        alphaMap={(() => {
+                            const res = 256;
+                            const canvas = document.createElement("canvas");
+                            canvas.width = res;
+                            canvas.height = res;
+                            const ctx = canvas.getContext("2d")!;
+                            const r = res * 0.12;
+                            ctx.fillStyle = "#ffffff";
+                            ctx.beginPath();
+                            ctx.moveTo(r, 0);
+                            ctx.lineTo(res - r, 0);
+                            ctx.quadraticCurveTo(res, 0, res, r);
+                            ctx.lineTo(res, res - r);
+                            ctx.quadraticCurveTo(res, res, res - r, res);
+                            ctx.lineTo(r, res);
+                            ctx.quadraticCurveTo(0, res, 0, res - r);
+                            ctx.lineTo(0, r);
+                            ctx.quadraticCurveTo(0, 0, r, 0);
+                            ctx.closePath();
+                            ctx.fill();
+                            const tex = new THREE.CanvasTexture(canvas);
+                            tex.needsUpdate = true;
+                            return tex;
+                        })()}
                         emissive="#ffffff"
-                        emissiveIntensity={0.15}
+                        emissiveIntensity={0.2}
                         emissiveMap={screenTexture}
                         transparent
-                        opacity={0.92}
+                        opacity={0.95}
                         toneMapped={false}
                     />
                 </mesh>
