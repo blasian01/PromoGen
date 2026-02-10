@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+/* ─── Data ─── */
 const PLATFORMS = [
   "Instagram",
   "TikTok",
@@ -131,52 +132,136 @@ const PRICING = [
   },
 ];
 
+/* ─── Reusable container style ─── */
+const container: React.CSSProperties = {
+  maxWidth: 1280,
+  marginLeft: "auto",
+  marginRight: "auto",
+  paddingLeft: 24,
+  paddingRight: 24,
+  width: "100%",
+};
+
+const containerNarrow: React.CSSProperties = {
+  ...container,
+  maxWidth: 1024,
+};
+
+const containerTight: React.CSSProperties = {
+  ...container,
+  maxWidth: 768,
+};
+
 export default function LandingPage() {
   return (
-    <div className="bg-black text-white min-h-screen overflow-x-hidden">
+    <div
+      style={{
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        minHeight: "100vh",
+        overflowX: "hidden",
+      }}
+    >
       {/* ─── Navigation ─── */}
-      <header className="fixed top-0 w-full z-50 glass-panel">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#7DD3FC] flex items-center justify-center">
-              <Layers className="w-4 h-4 text-black" strokeWidth={2.5} />
+      <header
+        style={{
+          position: "fixed",
+          top: 0,
+          width: "100%",
+          zIndex: 50,
+          background: "rgba(0, 0, 0, 0.8)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+        }}
+      >
+        <div
+          style={{
+            ...container,
+            height: 64,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                backgroundColor: "#7DD3FC",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Layers
+                style={{ width: 16, height: 16, color: "#000" }}
+                strokeWidth={2.5}
+              />
             </div>
-            <span className="text-lg font-semibold tracking-tight">
+            <span
+              style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em" }}
+            >
               PromoGen
             </span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              className="text-sm text-[#888] hover:text-white transition-colors duration-300"
-              href="#features"
-            >
-              Features
-            </a>
-            <a
-              className="text-sm text-[#888] hover:text-white transition-colors duration-300"
-              href="#how-it-works"
-            >
-              How It Works
-            </a>
-            <a
-              className="text-sm text-[#888] hover:text-white transition-colors duration-300"
-              href="#pricing"
-            >
-              Pricing
-            </a>
+          <nav
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 32,
+            }}
+          >
+            {["Features", "How It Works", "Pricing"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace(/ /g, "-")}`}
+                style={{
+                  fontSize: 14,
+                  color: "#888",
+                  textDecoration: "none",
+                  transition: "color 0.3s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "#fff")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "#888")
+                }
+              >
+                {item}
+              </a>
+            ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Link
               href="/login"
-              className="text-sm text-[#888] hover:text-white px-4 py-2 transition-colors duration-300"
+              style={{
+                fontSize: 14,
+                color: "#888",
+                padding: "8px 16px",
+                textDecoration: "none",
+                transition: "color 0.3s",
+              }}
             >
               Log in
             </Link>
             <Link
               href="/login"
-              className="text-sm font-medium bg-white text-black px-5 py-2 rounded-lg hover:bg-[#e5e5e5] transition-all duration-300"
+              style={{
+                fontSize: 14,
+                fontWeight: 500,
+                backgroundColor: "#fff",
+                color: "#000",
+                padding: "8px 20px",
+                borderRadius: 8,
+                textDecoration: "none",
+                transition: "background-color 0.3s",
+              }}
             >
               Get Started
             </Link>
@@ -186,29 +271,101 @@ export default function LandingPage() {
 
       <main>
         {/* ─── Hero ─── */}
-        <section className="relative pt-40 pb-24 lg:pt-52 lg:pb-32 overflow-hidden severance-grid">
+        <section
+          style={{
+            position: "relative",
+            paddingTop: 180,
+            paddingBottom: 80,
+            overflow: "hidden",
+          }}
+        >
           {/* Background glow */}
           <div
-            className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full animate-drift pointer-events-none"
             style={{
+              position: "absolute",
+              top: 40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 800,
+              height: 400,
+              borderRadius: "50%",
               background:
-                "radial-gradient(ellipse, rgba(125, 211, 252, 0.06) 0%, transparent 70%)",
+                "radial-gradient(ellipse, rgba(125, 211, 252, 0.08) 0%, transparent 70%)",
+              pointerEvents: "none",
             }}
           />
 
-          <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          {/* Severance grid */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+              pointerEvents: "none",
+            }}
+          />
+
+          <div style={{ ...containerNarrow, textAlign: "center", position: "relative", zIndex: 10 }}>
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium tracking-widest uppercase text-[#7DD3FC] mb-10 animate-fade-in-down">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7DD3FC] opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#7DD3FC]" />
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 16px",
+                borderRadius: 100,
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                backgroundColor: "rgba(255, 255, 255, 0.03)",
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase" as const,
+                color: "#7DD3FC",
+                marginBottom: 40,
+              }}
+            >
+              <span
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  width: 6,
+                  height: 6,
+                }}
+              >
+                <span
+                  className="animate-ping"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    backgroundColor: "#7DD3FC",
+                    opacity: 0.75,
+                  }}
+                />
+                <span
+                  style={{
+                    position: "relative",
+                    display: "inline-flex",
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    backgroundColor: "#7DD3FC",
+                  }}
+                />
               </span>
               Now in Beta
             </div>
 
             <h1
-              className="text-5xl sm:text-6xl lg:text-8xl font-bold tracking-[-0.04em] mb-8 animate-fade-in-up"
-              style={{ lineHeight: 1.05, animationDelay: "0.1s", opacity: 0 }}
+              style={{
+                fontSize: "clamp(48px, 8vw, 96px)",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.05,
+                marginBottom: 32,
+              }}
             >
               One platform.
               <br />
@@ -216,8 +373,15 @@ export default function LandingPage() {
             </h1>
 
             <p
-              className="text-lg lg:text-xl text-[#888] max-w-2xl mx-auto mb-14 leading-relaxed animate-fade-in-up"
-              style={{ animationDelay: "0.25s", opacity: 0 }}
+              style={{
+                fontSize: "clamp(16px, 2vw, 20px)",
+                color: "#888",
+                maxWidth: 560,
+                marginLeft: "auto",
+                marginRight: "auto",
+                marginBottom: 48,
+                lineHeight: 1.7,
+              }}
             >
               Manage all your social accounts, publish everywhere at once, and
               create AI-powered ads and UGC — built for teams running multiple
@@ -225,54 +389,191 @@ export default function LandingPage() {
             </p>
 
             <div
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
-              style={{ animationDelay: "0.4s", opacity: 0 }}
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+              }}
             >
               <Link
                 href="/login"
-                className="w-full sm:w-auto bg-[#7DD3FC] text-black text-sm font-semibold px-8 py-3.5 rounded-lg hover:bg-[#38BDF8] transition-all duration-300 flex items-center justify-center gap-2 glow-accent"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  backgroundColor: "#7DD3FC",
+                  color: "#000",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  padding: "14px 32px",
+                  borderRadius: 10,
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 0 30px rgba(125, 211, 252, 0.2), 0 0 60px rgba(125, 211, 252, 0.05)",
+                  transition: "all 0.3s",
+                }}
               >
                 Start Free Trial
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight style={{ width: 16, height: 16 }} />
               </Link>
-              <button className="w-full sm:w-auto text-sm font-medium text-white/70 px-8 py-3.5 rounded-lg border border-white/10 hover:border-white/20 hover:text-white transition-all duration-300">
+              <button
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "rgba(255,255,255,0.7)",
+                  padding: "14px 32px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  background: "transparent",
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+              >
                 Watch Demo
               </button>
             </div>
           </div>
 
           {/* Dashboard mockup */}
-          <div
-            className="max-w-5xl mx-auto px-6 mt-20 animate-fade-in-up"
-            style={{ animationDelay: "0.6s", opacity: 0 }}
-          >
-            <div className="rounded-2xl border border-white/[0.08] bg-[#0A0A0A] p-1 shadow-2xl shadow-black/50">
-              <div className="rounded-xl bg-[#111] overflow-hidden">
+          <div style={{ ...containerNarrow, marginTop: 80 }}>
+            <div
+              style={{
+                borderRadius: 16,
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                backgroundColor: "#0A0A0A",
+                padding: 4,
+                boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: "#111",
+                  overflow: "hidden",
+                }}
+              >
                 {/* Mock toolbar */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-[#333]" />
-                    <div className="w-3 h-3 rounded-full bg-[#333]" />
-                    <div className="w-3 h-3 rounded-full bg-[#333]" />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "12px 16px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#333",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#333",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#333",
+                      }}
+                    />
                   </div>
-                  <div className="flex-1 flex justify-center">
-                    <div className="bg-[#1a1a1a] rounded-md px-4 py-1 text-xs text-[#555] border border-white/[0.06]">
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        backgroundColor: "#1a1a1a",
+                        borderRadius: 6,
+                        padding: "4px 16px",
+                        fontSize: 12,
+                        color: "#555",
+                        border: "1px solid rgba(255, 255, 255, 0.06)",
+                      }}
+                    >
                       app.promogen.io/dashboard
                     </div>
                   </div>
                 </div>
 
                 {/* Mock dashboard content */}
-                <div className="p-6 lg:p-8">
-                  <div className="grid grid-cols-12 gap-4">
+                <div style={{ padding: "24px 32px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "200px 1fr",
+                      gap: 16,
+                    }}
+                  >
                     {/* Sidebar mock */}
-                    <div className="col-span-3 hidden lg:flex flex-col gap-3">
-                      <div className="bg-[#1a1a1a] rounded-lg p-3 border border-white/[0.06]">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 rounded-md bg-[#7DD3FC]/20 flex items-center justify-center">
-                            <Building2 className="w-3 h-3 text-[#7DD3FC]" />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: 8,
+                          padding: 12,
+                          border: "1px solid rgba(255, 255, 255, 0.06)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginBottom: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 6,
+                              backgroundColor: "rgba(125,211,252,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Building2
+                              style={{
+                                width: 12,
+                                height: 12,
+                                color: "#7DD3FC",
+                              }}
+                            />
                           </div>
-                          <span className="text-xs font-medium text-[#888]">
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: "#888",
+                            }}
+                          >
                             Workspaces
                           </span>
                         </div>
@@ -280,36 +581,87 @@ export default function LandingPage() {
                           (name, i) => (
                             <div
                               key={name}
-                              className={`text-xs py-1.5 px-2 rounded-md mb-1 ${i === 0
-                                  ? "bg-[#7DD3FC]/10 text-[#7DD3FC]"
-                                  : "text-[#555]"
-                                }`}
+                              style={{
+                                fontSize: 12,
+                                padding: "6px 8px",
+                                borderRadius: 6,
+                                marginBottom: 4,
+                                backgroundColor:
+                                  i === 0
+                                    ? "rgba(125,211,252,0.1)"
+                                    : "transparent",
+                                color: i === 0 ? "#7DD3FC" : "#555",
+                              }}
                             >
                               {name}
                             </div>
                           )
                         )}
                       </div>
-                      <div className="bg-[#1a1a1a] rounded-lg p-3 border border-white/[0.06]">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center">
-                            <BarChart3 className="w-3 h-3 text-[#555]" />
+                      <div
+                        style={{
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: 8,
+                          padding: 12,
+                          border: "1px solid rgba(255, 255, 255, 0.06)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginBottom: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 6,
+                              backgroundColor: "rgba(255,255,255,0.05)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <BarChart3
+                              style={{
+                                width: 12,
+                                height: 12,
+                                color: "#555",
+                              }}
+                            />
                           </div>
-                          <span className="text-xs font-medium text-[#888]">
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: "#888",
+                            }}
+                          >
                             Analytics
                           </span>
                         </div>
-                        <div className="flex items-end gap-1 h-12">
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-end",
+                            gap: 4,
+                            height: 48,
+                          }}
+                        >
                           {[40, 65, 45, 80, 55, 70, 90].map((h, i) => (
                             <div
                               key={i}
-                              className="flex-1 rounded-sm"
                               style={{
+                                flex: 1,
+                                borderRadius: 2,
                                 height: `${h}%`,
                                 background:
                                   i === 6
-                                    ? "rgba(125, 211, 252, 0.5)"
-                                    : "rgba(255, 255, 255, 0.06)",
+                                    ? "rgba(125,211,252,0.5)"
+                                    : "rgba(255,255,255,0.06)",
                               }}
                             />
                           ))}
@@ -318,17 +670,45 @@ export default function LandingPage() {
                     </div>
 
                     {/* Main content mock */}
-                    <div className="col-span-12 lg:col-span-9 flex flex-col gap-4">
-                      <div className="bg-[#1a1a1a] rounded-lg p-4 border border-white/[0.06]">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-sm font-medium">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                      }}
+                    >
+                      <div
+                        style={{
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: 8,
+                          padding: 16,
+                          border: "1px solid rgba(255, 255, 255, 0.06)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: 16,
+                          }}
+                        >
+                          <span style={{ fontSize: 14, fontWeight: 500 }}>
                             Recent Campaigns
                           </span>
-                          <span className="text-xs text-[#7DD3FC]">
+                          <span
+                            style={{ fontSize: 12, color: "#7DD3FC" }}
+                          >
                             View All
                           </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, 1fr)",
+                            gap: 12,
+                          }}
+                        >
                           {[
                             {
                               label: "Summer Launch",
@@ -348,27 +728,72 @@ export default function LandingPage() {
                           ].map((item) => (
                             <div
                               key={item.label}
-                              className="bg-[#222] rounded-lg p-3 border border-white/[0.04]"
+                              style={{
+                                backgroundColor: "#222",
+                                borderRadius: 8,
+                                padding: 12,
+                                border: "1px solid rgba(255,255,255,0.04)",
+                              }}
                             >
-                              <div className="w-full aspect-video rounded-md bg-[#2a2a2a] mb-2 flex items-center justify-center">
-                                <Sparkles className="w-5 h-5 text-[#333]" />
+                              <div
+                                style={{
+                                  width: "100%",
+                                  aspectRatio: "16/9",
+                                  borderRadius: 6,
+                                  backgroundColor: "#2a2a2a",
+                                  marginBottom: 8,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Sparkles
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    color: "#333",
+                                  }}
+                                />
                               </div>
-                              <p className="text-xs font-medium mb-1">
+                              <p
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 500,
+                                  marginBottom: 4,
+                                }}
+                              >
                                 {item.label}
                               </p>
-                              <div className="flex items-center justify-between">
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
                                 <span
-                                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.status === "Published"
-                                      ? "bg-green-500/10 text-green-400"
-                                      : item.status === "Scheduled"
-                                        ? "bg-[#7DD3FC]/10 text-[#7DD3FC]"
-                                        : "bg-white/5 text-[#555]"
-                                    }`}
+                                  style={{
+                                    fontSize: 10,
+                                    padding: "2px 6px",
+                                    borderRadius: 100,
+                                    backgroundColor:
+                                      item.status === "Published"
+                                        ? "rgba(34,197,94,0.1)"
+                                        : item.status === "Scheduled"
+                                          ? "rgba(125,211,252,0.1)"
+                                          : "rgba(255,255,255,0.05)",
+                                    color:
+                                      item.status === "Published"
+                                        ? "#4ade80"
+                                        : item.status === "Scheduled"
+                                          ? "#7DD3FC"
+                                          : "#555",
+                                  }}
                                 >
                                   {item.status}
                                 </span>
                                 {item.platforms > 0 && (
-                                  <span className="text-[10px] text-[#555]">
+                                  <span style={{ fontSize: 10, color: "#555" }}>
                                     {item.platforms} platforms
                                   </span>
                                 )}
@@ -377,24 +802,63 @@ export default function LandingPage() {
                           ))}
                         </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(3, 1fr)",
+                          gap: 12,
+                        }}
+                      >
                         {[
-                          { label: "Total Reach", value: "284K", change: "+12%" },
-                          { label: "Engagement", value: "18.4%", change: "+3.2%" },
-                          { label: "AI Credits", value: "420", change: "of 500" },
+                          {
+                            label: "Total Reach",
+                            value: "284K",
+                            change: "+12%",
+                          },
+                          {
+                            label: "Engagement",
+                            value: "18.4%",
+                            change: "+3.2%",
+                          },
+                          {
+                            label: "AI Credits",
+                            value: "420",
+                            change: "of 500",
+                          },
                         ].map((stat) => (
                           <div
                             key={stat.label}
-                            className="bg-[#1a1a1a] rounded-lg p-4 border border-white/[0.06]"
+                            style={{
+                              backgroundColor: "#1a1a1a",
+                              borderRadius: 8,
+                              padding: 16,
+                              border: "1px solid rgba(255, 255, 255, 0.06)",
+                            }}
                           >
-                            <p className="text-[10px] uppercase tracking-wider text-[#555] mb-1">
+                            <p
+                              style={{
+                                fontSize: 10,
+                                textTransform: "uppercase" as const,
+                                letterSpacing: "0.1em",
+                                color: "#555",
+                                marginBottom: 4,
+                              }}
+                            >
                               {stat.label}
                             </p>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-xl font-semibold">
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "baseline",
+                                gap: 8,
+                              }}
+                            >
+                              <span
+                                style={{ fontSize: 20, fontWeight: 600 }}
+                              >
                                 {stat.value}
                               </span>
-                              <span className="text-[10px] text-[#7DD3FC]">
+                              <span style={{ fontSize: 10, color: "#7DD3FC" }}>
                                 {stat.change}
                               </span>
                             </div>
@@ -410,16 +874,46 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Platform Integrations ─── */}
-        <section className="py-16 border-y border-white/[0.06]">
-          <div className="max-w-7xl mx-auto px-6">
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#555] text-center mb-10">
+        <section
+          style={{
+            padding: "64px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div style={container}>
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase" as const,
+                color: "#555",
+                textAlign: "center",
+                marginBottom: 40,
+              }}
+            >
               Publish to every major platform
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-16">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "24px 64px",
+              }}
+            >
               {PLATFORMS.map((platform) => (
                 <span
                   key={platform}
-                  className="text-sm font-medium text-[#444] hover:text-[#7DD3FC] transition-colors duration-300 cursor-default"
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#444",
+                    cursor: "default",
+                    transition: "color 0.3s",
+                  }}
                 >
                   {platform}
                 </span>
@@ -429,39 +923,108 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Features ─── */}
-        <section id="features" className="py-24 lg:py-32 relative">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="max-w-2xl mb-16">
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#7DD3FC] mb-4">
+        <section id="features" style={{ padding: "120px 0" }}>
+          <div style={container}>
+            <div style={{ textAlign: "center", marginBottom: 64 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase" as const,
+                  color: "#7DD3FC",
+                  marginBottom: 16,
+                }}
+              >
                 Features
               </p>
-              <h2 className="text-3xl lg:text-5xl font-bold tracking-[-0.03em] mb-6">
+              <h2
+                style={{
+                  fontSize: "clamp(32px, 5vw, 48px)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.2,
+                }}
+              >
                 Everything you need.
                 <br />
-                <span className="text-[#555]">Nothing you don&apos;t.</span>
+                <span style={{ color: "#555" }}>Nothing you don&apos;t.</span>
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+                gap: 16,
+              }}
+            >
               {FEATURES.map((feature) => {
                 const Icon = feature.icon;
                 return (
                   <div
                     key={feature.title}
-                    className="glass-card rounded-2xl p-8 group cursor-default"
+                    className="glass-card"
+                    style={{
+                      borderRadius: 16,
+                      padding: 32,
+                      cursor: "default",
+                    }}
                   >
-                    <div className="flex items-center gap-3 mb-5">
-                      <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover:border-[#7DD3FC]/30 transition-colors duration-300">
-                        <Icon className="w-5 h-5 text-[#7DD3FC]" />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        marginBottom: 20,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 12,
+                          backgroundColor: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transition: "border-color 0.3s",
+                        }}
+                      >
+                        <Icon
+                          style={{ width: 20, height: 20, color: "#7DD3FC" }}
+                        />
                       </div>
-                      <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#555]">
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: "0.15em",
+                          textTransform: "uppercase" as const,
+                          color: "#555",
+                        }}
+                      >
                         {feature.tag}
                       </span>
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 tracking-tight">
+                    <h3
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 600,
+                        marginBottom: 12,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-[#888] leading-relaxed">
+                    <p
+                      style={{
+                        fontSize: 14,
+                        color: "#888",
+                        lineHeight: 1.7,
+                      }}
+                    >
                       {feature.description}
                     </p>
                   </div>
@@ -474,37 +1037,111 @@ export default function LandingPage() {
         {/* ─── How It Works ─── */}
         <section
           id="how-it-works"
-          className="py-24 lg:py-32 border-t border-white/[0.06] severance-grid"
+          style={{
+            padding: "120px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            position: "relative",
+          }}
         >
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-20">
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#7DD3FC] mb-4">
+          {/* Severance grid */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+              pointerEvents: "none",
+            }}
+          />
+
+          <div style={{ ...container, position: "relative", zIndex: 10 }}>
+            <div style={{ textAlign: "center", marginBottom: 80 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase" as const,
+                  color: "#7DD3FC",
+                  marginBottom: 16,
+                }}
+              >
                 How It Works
               </p>
-              <h2 className="text-3xl lg:text-5xl font-bold tracking-[-0.03em]">
+              <h2
+                style={{
+                  fontSize: "clamp(32px, 5vw, 48px)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                }}
+              >
                 Three steps. Infinite reach.
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+                gap: 24,
+              }}
+            >
               {STEPS.map((step) => {
                 const Icon = step.icon;
                 return (
-                  <div key={step.number} className="relative group">
-                    <div className="glass-card rounded-2xl p-8 h-full">
-                      <span className="text-5xl font-black text-white/[0.04] block mb-6 tracking-tighter">
-                        {step.number}
-                      </span>
-                      <div className="w-10 h-10 rounded-xl bg-[#7DD3FC]/10 flex items-center justify-center mb-5">
-                        <Icon className="w-5 h-5 text-[#7DD3FC]" />
-                      </div>
-                      <h3 className="text-xl font-semibold mb-3 tracking-tight">
-                        {step.title}
-                      </h3>
-                      <p className="text-sm text-[#888] leading-relaxed">
-                        {step.description}
-                      </p>
+                  <div
+                    key={step.number}
+                    className="glass-card"
+                    style={{ borderRadius: 16, padding: 32 }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 48,
+                        fontWeight: 900,
+                        color: "rgba(255,255,255,0.04)",
+                        display: "block",
+                        marginBottom: 24,
+                        letterSpacing: "-0.05em",
+                      }}
+                    >
+                      {step.number}
+                    </span>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 12,
+                        backgroundColor: "rgba(125,211,252,0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 20,
+                      }}
+                    >
+                      <Icon
+                        style={{ width: 20, height: 20, color: "#7DD3FC" }}
+                      />
                     </div>
+                    <h3
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 600,
+                        marginBottom: 12,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {step.title}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        color: "#888",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {step.description}
+                    </p>
                   </div>
                 );
               })}
@@ -513,9 +1150,21 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Social Proof ─── */}
-        <section className="py-24 border-t border-white/[0.06]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <section
+          style={{
+            padding: "96px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div style={container}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gap: 32,
+                textAlign: "center",
+              }}
+            >
               {[
                 { value: "10K+", label: "Active Users" },
                 { value: "2M+", label: "Posts Published" },
@@ -523,10 +1172,26 @@ export default function LandingPage() {
                 { value: "99.9%", label: "Uptime SLA" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <p className="text-3xl lg:text-4xl font-bold tracking-tight gradient-text-subtle mb-2">
+                  <p
+                    className="gradient-text-subtle"
+                    style={{
+                      fontSize: "clamp(28px, 4vw, 40px)",
+                      fontWeight: 700,
+                      letterSpacing: "-0.02em",
+                      marginBottom: 8,
+                    }}
+                  >
                     {stat.value}
                   </p>
-                  <p className="text-xs text-[#555] uppercase tracking-wider font-medium">
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: "#555",
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.12em",
+                      fontWeight: 500,
+                    }}
+                  >
                     {stat.label}
                   </p>
                 </div>
@@ -538,58 +1203,165 @@ export default function LandingPage() {
         {/* ─── Pricing ─── */}
         <section
           id="pricing"
-          className="py-24 lg:py-32 border-t border-white/[0.06]"
+          style={{
+            padding: "120px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
         >
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-[#7DD3FC] mb-4">
+          <div style={container}>
+            <div style={{ textAlign: "center", marginBottom: 64 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase" as const,
+                  color: "#7DD3FC",
+                  marginBottom: 16,
+                }}
+              >
                 Pricing
               </p>
-              <h2 className="text-3xl lg:text-5xl font-bold tracking-[-0.03em] mb-4">
+              <h2
+                style={{
+                  fontSize: "clamp(32px, 5vw, 48px)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  marginBottom: 16,
+                }}
+              >
                 Simple, transparent pricing.
               </h2>
-              <p className="text-[#888] max-w-lg mx-auto">
+              <p style={{ color: "#888", maxWidth: 480, margin: "0 auto" }}>
                 Start free. Scale as you grow. No hidden fees.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+                gap: 16,
+                maxWidth: 1024,
+                margin: "0 auto",
+              }}
+            >
               {PRICING.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`rounded-2xl p-8 border flex flex-col ${plan.popular
-                      ? "pricing-popular"
-                      : "border-white/[0.08] bg-[#0A0A0A]"
-                    }`}
+                  className={plan.popular ? "pricing-popular" : ""}
+                  style={{
+                    borderRadius: 16,
+                    padding: 32,
+                    border: plan.popular
+                      ? "1px solid rgba(125,211,252,0.3)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: plan.popular
+                      ? "rgba(125,211,252,0.03)"
+                      : "#0A0A0A",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
                 >
                   {plan.popular && (
-                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#7DD3FC] mb-4">
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase" as const,
+                        color: "#7DD3FC",
+                        marginBottom: 16,
+                      }}
+                    >
                       Most Popular
                     </span>
                   )}
-                  <h3 className="text-xl font-semibold mb-1">{plan.name}</h3>
-                  <p className="text-xs text-[#555] mb-6">{plan.description}</p>
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-sm text-[#555]">/mo</span>
+                  <h3
+                    style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}
+                  >
+                    {plan.name}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "#555",
+                      marginBottom: 24,
+                    }}
+                  >
+                    {plan.description}
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 4,
+                      marginBottom: 32,
+                    }}
+                  >
+                    <span style={{ fontSize: 40, fontWeight: 700 }}>
+                      ${plan.price}
+                    </span>
+                    <span style={{ fontSize: 14, color: "#555" }}>/mo</span>
                   </div>
-                  <ul className="flex flex-col gap-3 mb-8 flex-1">
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                      marginBottom: 32,
+                      flex: 1,
+                    }}
+                  >
                     {plan.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-center gap-3 text-sm text-[#888]"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          fontSize: 14,
+                          color: "#888",
+                        }}
                       >
-                        <Check className="w-4 h-4 text-[#7DD3FC] flex-shrink-0" />
+                        <Check
+                          style={{
+                            width: 16,
+                            height: 16,
+                            color: "#7DD3FC",
+                            flexShrink: 0,
+                          }}
+                        />
                         {feature}
                       </li>
                     ))}
                   </ul>
                   <Link
                     href="/login"
-                    className={`w-full text-center text-sm font-semibold py-3 rounded-lg transition-all duration-300 ${plan.popular
-                        ? "bg-[#7DD3FC] text-black hover:bg-[#38BDF8] glow-accent"
-                        : "bg-white/[0.05] text-white hover:bg-white/[0.1] border border-white/[0.08]"
-                      }`}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "center",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      padding: "12px 0",
+                      borderRadius: 8,
+                      textDecoration: "none",
+                      transition: "all 0.3s",
+                      ...(plan.popular
+                        ? {
+                          backgroundColor: "#7DD3FC",
+                          color: "#000",
+                          boxShadow:
+                            "0 0 30px rgba(125,211,252,0.2), 0 0 60px rgba(125,211,252,0.05)",
+                        }
+                        : {
+                          backgroundColor: "rgba(255,255,255,0.05)",
+                          color: "#fff",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                        }),
+                    }}
                   >
                     {plan.cta}
                   </Link>
@@ -600,23 +1372,69 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Security Section ─── */}
-        <section className="py-24 border-t border-white/[0.06]">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.08] mb-6">
-              <Shield className="w-7 h-7 text-[#7DD3FC]" />
+        <section
+          style={{
+            padding: "96px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div style={{ ...containerTight, textAlign: "center" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                backgroundColor: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                marginBottom: 24,
+              }}
+            >
+              <Shield style={{ width: 28, height: 28, color: "#7DD3FC" }} />
             </div>
-            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight mb-4">
+            <h2
+              style={{
+                fontSize: "clamp(24px, 3vw, 32px)",
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                marginBottom: 16,
+              }}
+            >
               Enterprise-grade security
             </h2>
-            <p className="text-[#888] max-w-lg mx-auto mb-10">
+            <p
+              style={{
+                color: "#888",
+                maxWidth: 480,
+                margin: "0 auto 40px",
+                lineHeight: 1.7,
+              }}
+            >
               SOC 2 compliant. End-to-end encryption. Your data never leaves
               your control. Built for teams that take security seriously.
             </p>
-            <div className="flex flex-wrap justify-center gap-6">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 12,
+              }}
+            >
               {["SOC 2", "GDPR", "Encrypted", "SSO Ready"].map((badge) => (
                 <span
                   key={badge}
-                  className="text-xs font-medium text-[#555] px-4 py-2 rounded-full border border-white/[0.08] bg-white/[0.02]"
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "#555",
+                    padding: "8px 16px",
+                    borderRadius: 100,
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                  }}
                 >
                   {badge}
                 </span>
@@ -626,71 +1444,188 @@ export default function LandingPage() {
         </section>
 
         {/* ─── Final CTA ─── */}
-        <section className="py-24 lg:py-32 relative overflow-hidden">
+        <section
+          style={{
+            padding: "120px 0",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
           <div
-            className="absolute inset-0 pointer-events-none"
             style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
               background:
-                "radial-gradient(ellipse at 50% 50%, rgba(125, 211, 252, 0.04) 0%, transparent 60%)",
+                "radial-gradient(ellipse at 50% 50%, rgba(125,211,252,0.04) 0%, transparent 60%)",
             }}
           />
-          <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-            <h2 className="text-4xl lg:text-6xl font-bold tracking-[-0.04em] mb-6">
+          <div
+            style={{
+              ...containerTight,
+              textAlign: "center",
+              position: "relative",
+              zIndex: 10,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "clamp(36px, 6vw, 64px)",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                marginBottom: 24,
+                lineHeight: 1.1,
+              }}
+            >
               Ready to take
               <br />
               <span className="gradient-text">control?</span>
             </h2>
-            <p className="text-[#888] text-lg max-w-md mx-auto mb-10">
+            <p
+              style={{
+                color: "#888",
+                fontSize: 18,
+                maxWidth: 400,
+                margin: "0 auto 40px",
+                lineHeight: 1.7,
+              }}
+            >
               Start your free trial today. No credit card required. Set up in
               under 60 seconds.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+              }}
+            >
               <Link
                 href="/login"
-                className="w-full sm:w-auto bg-[#7DD3FC] text-black text-sm font-semibold px-8 py-3.5 rounded-lg hover:bg-[#38BDF8] transition-all duration-300 flex items-center justify-center gap-2 glow-accent"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  backgroundColor: "#7DD3FC",
+                  color: "#000",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  padding: "14px 32px",
+                  borderRadius: 10,
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 0 30px rgba(125,211,252,0.2), 0 0 60px rgba(125,211,252,0.05)",
+                  transition: "all 0.3s",
+                }}
               >
                 Get Started Free
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight style={{ width: 16, height: 16 }} />
               </Link>
               <Link
                 href="#pricing"
-                className="w-full sm:w-auto text-sm font-medium text-[#888] hover:text-white flex items-center justify-center gap-1 transition-colors duration-300"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "#888",
+                  textDecoration: "none",
+                  transition: "color 0.3s",
+                }}
               >
                 View pricing
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight style={{ width: 16, height: 16 }} />
               </Link>
             </div>
           </div>
         </section>
 
         {/* ─── Footer ─── */}
-        <footer className="py-12 border-t border-white/[0.06]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-md bg-[#7DD3FC]/20 flex items-center justify-center">
-                  <Layers className="w-3.5 h-3.5 text-[#7DD3FC]" />
+        <footer
+          style={{
+            padding: "48px 0",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div style={container}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 32,
+                marginBottom: 40,
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 10 }}
+              >
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 6,
+                    backgroundColor: "rgba(125,211,252,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Layers
+                    style={{ width: 14, height: 14, color: "#7DD3FC" }}
+                  />
                 </div>
-                <span className="text-sm font-semibold tracking-tight">
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
                   PromoGen
                 </span>
               </div>
-              <div className="flex gap-8">
+              <div style={{ display: "flex", gap: 32 }}>
                 {["Privacy", "Terms", "Twitter", "GitHub"].map((link) => (
                   <a
                     key={link}
                     href="#"
-                    className="text-sm text-[#555] hover:text-white transition-colors duration-300"
+                    style={{
+                      fontSize: 14,
+                      color: "#555",
+                      textDecoration: "none",
+                      transition: "color 0.3s",
+                    }}
                   >
                     {link}
                   </a>
                 ))}
               </div>
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#333]">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 16,
+                fontSize: 12,
+                color: "#333",
+              }}
+            >
               <p>© 2025 PromoGen Inc. All rights reserved.</p>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-3 h-3" />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Users style={{ width: 12, height: 12 }} />
                 Built for modern teams
               </div>
             </div>
