@@ -241,8 +241,8 @@ function IPhone({ index, total }: { index: number; total: number }) {
         return {
             processedGeometry: geo,
             screenDims: {
-                width: finalSize.x * 0.75,
-                height: finalSize.y * 0.88,
+                width: finalSize.x * 0.92,
+                height: finalSize.y * 0.95,
                 depth: finalSize.z,
             },
         };
@@ -421,7 +421,7 @@ function useIconTextures() {
 /* ─── Main Scene ─── */
 function Scene() {
     const textures = useIconTextures();
-    const streamCount = 36;
+    const streamCount = 60;
 
     if (textures.length === 0) return null;
 

@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const PhoneScene = dynamic(() => import("@/components/PhoneScene"), { ssr: false });
 import {
   ArrowRight,
   Check,
@@ -291,6 +294,19 @@ export default function LandingPage() {
               pointerEvents: "none",
             }}
           />
+
+          {/* 3D Phone animation background */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0.4,
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          >
+            <PhoneScene />
+          </div>
 
           {/* Severance grid */}
           <div

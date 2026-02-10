@@ -176,7 +176,7 @@ export default function LoginPage() {
                     >
                         Ship products.
                         <br />
-                        <span className="gradient-text">We handle the marketing.</span>
+                        <span className="gradient-text">Market fast.</span>
                     </h1>
                     <p style={{ fontSize: 16, color: "#888", lineHeight: 1.7 }}>
                         One platform to manage every social account, generate AI ads, and
