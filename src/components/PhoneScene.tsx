@@ -163,9 +163,10 @@ function IPhone({ index, total }: { index: number; total: number }) {
     const groupRef = useRef<THREE.Group>(null);
     const offset = (index / total) * Math.PI * 2;
     const geometry = useLoader(STLLoader, "/models/iPhone_17_Pro_Max.stl");
+    const screenTexture = useLoader(THREE.TextureLoader, "/models/phone_screen.png");
 
-    // Center and scale the STL geometry on first load
-    const processedGeometry = useMemo(() => {
+    // Center, orient upright, and scale the STL geometry
+    const { processedGeometry, screenDims } = useMemo(() => {
         const geo = geometry.clone();
         geo.computeBoundingBox();
         const box = geo.boundingBox!;
@@ -173,15 +174,71 @@ function IPhone({ index, total }: { index: number; total: number }) {
         box.getCenter(center);
         geo.translate(-center.x, -center.y, -center.z);
 
-        // Scale to fit — target height of ~2.2 units
+        // Measure dimensions
         const size = new THREE.Vector3();
         box.getSize(size);
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2.2 / maxDim;
+
+        // The phone's longest dimension should be Y (upright).
+        // Determine which axis is longest and rotate accordingly.
+        const dims = [
+            { axis: "x", val: size.x },
+            { axis: "y", val: size.y },
+            { axis: "z", val: size.z },
+        ].sort((a, b) => b.val - a.val);
+
+        const longest = dims[0].axis;
+        const middle = dims[1].axis;
+        const shortest = dims[2].axis;
+
+        // Rotate so longest axis → Y, shortest → Z (depth)
+        if (longest === "x") {
+            geo.rotateZ(Math.PI / 2); // X → Y
+        } else if (longest === "z") {
+            geo.rotateX(Math.PI / 2); // Z → Y
+        }
+
+        // After rotation, recompute
+        geo.computeBoundingBox();
+        const newBox = geo.boundingBox!;
+        const newSize = new THREE.Vector3();
+        newBox.getSize(newSize);
+
+        // Re-center after rotation
+        const newCenter = new THREE.Vector3();
+        newBox.getCenter(newCenter);
+        geo.translate(-newCenter.x, -newCenter.y, -newCenter.z);
+
+        // If depth (Z) is larger than width (X), rotate 90° around Y
+        if (newSize.z > newSize.x) {
+            geo.rotateY(Math.PI / 2);
+            geo.computeBoundingBox();
+            const fixBox = geo.boundingBox!;
+            const fixCenter = new THREE.Vector3();
+            fixBox.getCenter(fixCenter);
+            geo.translate(-fixCenter.x, -fixCenter.y, -fixCenter.z);
+            fixBox.getSize(newSize);
+        }
+
+        // Scale to target height of ~2.2
+        const targetHeight = 2.2;
+        const scale = targetHeight / newSize.y;
         geo.scale(scale, scale, scale);
 
+        geo.computeBoundingBox();
+        const finalBox = geo.boundingBox!;
+        const finalSize = new THREE.Vector3();
+        finalBox.getSize(finalSize);
+
         geo.computeVertexNormals();
-        return geo;
+
+        return {
+            processedGeometry: geo,
+            screenDims: {
+                width: finalSize.x * 0.85,
+                height: finalSize.y * 0.9,
+                depth: finalSize.z,
+            },
+        };
     }, [geometry]);
 
     useFrame(({ clock }) => {
@@ -201,6 +258,7 @@ function IPhone({ index, total }: { index: number; total: number }) {
     return (
         <group ref={groupRef}>
             <Float speed={2} rotationIntensity={0.1} floatIntensity={0.3}>
+                {/* Phone body */}
                 <mesh geometry={processedGeometry}>
                     <meshPhysicalMaterial
                         color="#3a3a3e"
@@ -211,6 +269,16 @@ function IPhone({ index, total }: { index: number; total: number }) {
                         envMapIntensity={1.2}
                         emissive="#1a2a3a"
                         emissiveIntensity={0.15}
+                    />
+                </mesh>
+
+                {/* Screen overlay — textured plane on front face */}
+                <mesh position={[0, 0, screenDims.depth / 2 + 0.001]}>
+                    <planeGeometry args={[screenDims.width, screenDims.height]} />
+                    <meshBasicMaterial
+                        map={screenTexture}
+                        transparent
+                        opacity={0.95}
                     />
                 </mesh>
             </Float>
