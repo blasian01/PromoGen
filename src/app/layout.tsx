@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PromoGen | Your Social Command Center",
+  title: "Sociably | Your Social Command Center",
   description:
     "One platform to manage social accounts across all your projects. Publish everywhere at once, generate AI ads and UGC — built for solo devs shipping fast.",
   keywords:

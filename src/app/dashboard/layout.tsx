@@ -21,11 +21,25 @@ export default function DashboardLayout({
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#101622]">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-[#135bec] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] uppercase tracking-widest text-white/50">Loading...</span>
-                </div>
+            <div
+                style={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#000",
+                }}
+            >
+                <div
+                    style={{
+                        width: 40,
+                        height: 40,
+                        border: "2px solid #7DD3FC",
+                        borderTopColor: "transparent",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite",
+                    }}
+                />
             </div>
         );
     }
@@ -33,9 +47,17 @@ export default function DashboardLayout({
     if (!user) return null;
 
     return (
-        <div className="flex min-h-screen bg-[#f6f6f8] dark:bg-[#101622]">
+        <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#000" }}>
             <Sidebar />
-            <main className="flex-1 ml-64 flex flex-col">
+            <main
+                style={{
+                    flex: 1,
+                    marginLeft: 260,
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: "100vh",
+                }}
+            >
                 {children}
             </main>
         </div>

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button, Card, CardContent, Badge, Tabs, TabPanel, Input } from "@/components/ui";
 import {
     DUMMY_CAMPAIGNS,
     DUMMY_PRODUCTS,
@@ -32,26 +30,58 @@ import {
     ExternalLink,
     Clock,
     Check,
-    Video,
     Smartphone,
     Monitor,
     Wand2,
 } from "lucide-react";
 
-const TAB_CONFIG = [
-    { id: "setup", label: "Setup", icon: <Settings className="w-4 h-4" /> },
-    { id: "products", label: "Products", icon: <ShoppingCart className="w-4 h-4" /> },
-    { id: "assets", label: "AI Assets", icon: <Users className="w-4 h-4" /> },
-    { id: "style", label: "Style", icon: <Camera className="w-4 h-4" /> },
-    { id: "preview", label: "Preview", icon: <Play className="w-4 h-4" /> },
-    { id: "export", label: "Export", icon: <Download className="w-4 h-4" /> },
-];
+/* ─── shared token ─── */
+const ACCENT = "#7DD3FC";
 
-const CAMPAIGN_TYPE_ICONS: Record<string, any> = {
+const CAMPAIGN_TYPE_ICONS: Record<string, typeof Package> = {
     product: Package,
     software: Code,
     service: Users,
     brand_awareness: Megaphone,
+};
+
+const TAB_CONFIG = [
+    { id: "setup", label: "Setup", icon: Settings },
+    { id: "products", label: "Products", icon: ShoppingCart },
+    { id: "assets", label: "AI Assets", icon: Users },
+    { id: "style", label: "Style", icon: Camera },
+    { id: "preview", label: "Preview", icon: Play },
+    { id: "export", label: "Export", icon: Download },
+];
+
+/* ─── reusable style helpers ─── */
+const cardStyle: React.CSSProperties = {
+    backgroundColor: "rgba(255,255,255,0.02)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    borderRadius: 14,
+    transition: "all 0.25s",
+};
+
+const sectionLabel: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 600,
+    color: "#555",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    marginBottom: 14,
+};
+
+const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "11px 14px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    color: "#fff",
+    fontSize: 13,
+    outline: "none",
+    boxSizing: "border-box" as const,
+    transition: "border 0.2s",
 };
 
 export default function CampaignEditorPage() {
@@ -74,112 +104,101 @@ export default function CampaignEditorPage() {
     const [ctaText, setCtaText] = useState(existingCampaign?.ctaText || "Shop Now");
     const [ctaUrl, setCtaUrl] = useState(existingCampaign?.ctaUrl || "");
 
-    const [selectedProducts, setSelectedProducts] = useState<string[]>(
-        DUMMY_PRODUCTS.slice(0, 2).map((p) => p.id)
-    );
-    const [selectedAssets, setSelectedAssets] = useState<string[]>(
-        DUMMY_AI_ASSETS.slice(0, 2).map((a) => a.id)
-    );
+    const [selectedProducts, setSelectedProducts] = useState<string[]>(DUMMY_PRODUCTS.slice(0, 2).map((p) => p.id));
+    const [selectedAssets, setSelectedAssets] = useState<string[]>(DUMMY_AI_ASSETS.slice(0, 2).map((a) => a.id));
     const [videoStyle, setVideoStyle] = useState("cinematic");
     const [cameraMovement, setCameraMovement] = useState("pan_right");
     const [selectedFormats, setSelectedFormats] = useState<string[]>(["tiktok", "youtube-ad"]);
 
-    const handleSave = async () => {
-        setIsSaving(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsSaving(false);
-    };
+    const handleSave = async () => { setIsSaving(true); await new Promise((r) => setTimeout(r, 1000)); setIsSaving(false); };
+    const toggleProduct = (id: string) => setSelectedProducts((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+    const toggleAsset = (id: string) => setSelectedAssets((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+    const toggleFormat = (id: string) => setSelectedFormats((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
 
-    const toggleProduct = (productId: string) => {
-        setSelectedProducts((prev) =>
-            prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
-        );
-    };
+    const statusColor = existingCampaign?.status === "published" ? "#22c55e"
+        : existingCampaign?.status === "ready" ? "#22c55e"
+            : existingCampaign?.status === "generating" ? "#f59e0b"
+                : "#888";
 
-    const toggleAsset = (assetId: string) => {
-        setSelectedAssets((prev) =>
-            prev.includes(assetId) ? prev.filter((id) => id !== assetId) : [...prev, assetId]
-        );
-    };
-
-    const toggleFormat = (formatId: string) => {
-        setSelectedFormats((prev) =>
-            prev.includes(formatId) ? prev.filter((id) => id !== formatId) : [...prev, formatId]
-        );
-    };
-
+    /* ───────────────────────── render ───────────────────────── */
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* Top Bar */}
-            <div className="bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 py-4 sticky top-0 z-10">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="p-2 hover:bg-white/5 rounded-sm transition-colors text-white/50 hover:text-white"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        <div>
-                            <input
-                                type="text"
-                                value={campaignName}
-                                onChange={(e) => setCampaignName(e.target.value)}
-                                className="text-xl font-bold text-white bg-transparent border-none focus:outline-none focus:ring-0 w-auto"
-                            />
-                            <p className="text-[10px] uppercase tracking-widest text-white/30">
-                                {isNew ? "Creating new campaign" : `Last saved: ${existingCampaign?.updatedAt ? new Date(existingCampaign.updatedAt).toLocaleString() : "Never"}`}
-                            </p>
-                        </div>
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+            {/* ═══ Top Bar ═══ */}
+            <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "14px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                backdropFilter: "blur(16px)", backgroundColor: "rgba(0,0,0,0.5)",
+                position: "sticky", top: 0, zIndex: 10,
+            }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <button onClick={() => router.back()} style={{ padding: 8, borderRadius: 8, border: "none", backgroundColor: "transparent", color: "#888", cursor: "pointer" }}>
+                        <ArrowLeft style={{ width: 20, height: 20 }} />
+                    </button>
+                    <div>
+                        <input type="text" value={campaignName} onChange={(e) => setCampaignName(e.target.value)}
+                            style={{ fontSize: 18, fontWeight: 700, color: "#fff", background: "transparent", border: "none", outline: "none", width: 280 }} />
+                        <p style={{ fontSize: 11, color: "#444", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                            {isNew ? "Creating new campaign" : `Last saved: ${existingCampaign?.updatedAt ? new Date(existingCampaign.updatedAt).toLocaleDateString() : "Never"}`}
+                        </p>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                        <Badge variant={existingCampaign?.status === "published" ? "success" : "warning"}>
-                            {existingCampaign?.status || "Draft"}
-                        </Badge>
-                        <Button variant="outline" onClick={handleSave} disabled={isSaving}>
-                            <Save className="w-4 h-4 mr-2" />
-                            {isSaving ? "Saving..." : "Save"}
-                        </Button>
-                        <Button>
-                            <Wand2 className="w-4 h-4 mr-2" />
-                            Generate Ad
-                        </Button>
-                    </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 600, backgroundColor: `${statusColor}18`, color: statusColor, textTransform: "capitalize" }}>
+                        {existingCampaign?.status || "Draft"}
+                    </span>
+                    <button onClick={handleSave} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "transparent", color: "#ccc", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+                        <Save style={{ width: 14, height: 14 }} /> {isSaving ? "Saving…" : "Save"}
+                    </button>
+                    <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 22px", borderRadius: 10, border: "none", backgroundColor: ACCENT, color: "#000", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: `0 0 24px ${ACCENT}33` }}>
+                        <Wand2 style={{ width: 14, height: 14 }} /> Generate Ad
+                    </button>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="bg-white/[0.02] border-b border-white/5 px-6">
-                <Tabs tabs={TAB_CONFIG} activeTab={activeTab} onChange={setActiveTab} />
+            {/* ═══ Tab Bar ═══ */}
+            <div style={{ display: "flex", gap: 0, padding: "0 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                {TAB_CONFIG.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                display: "flex", alignItems: "center", gap: 6,
+                                padding: "12px 20px", border: "none", backgroundColor: "transparent",
+                                color: isActive ? ACCENT : "#555", fontSize: 13, fontWeight: isActive ? 600 : 400,
+                                borderBottom: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
+                                cursor: "pointer", transition: "all 0.2s",
+                            }}>
+                            <Icon style={{ width: 15, height: 15 }} /> {tab.label}
+                        </button>
+                    );
+                })}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 p-6">
-                <div className="max-w-5xl mx-auto">
-                    {/* Setup Tab */}
-                    <TabPanel isActive={activeTab === "setup"}>
-                        <div className="space-y-10">
+            {/* ═══ Content ═══ */}
+            <div style={{ flex: 1, padding: "32px 28px 48px", overflowY: "auto" }}>
+                <div style={{ maxWidth: 960, margin: "0 auto" }}>
+
+                    {/* ────── SETUP TAB ────── */}
+                    {activeTab === "setup" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
                             {/* Campaign Type */}
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Campaign Type
-                                </h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <p style={sectionLabel}>Campaign Type</p>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
                                     {CAMPAIGN_TYPES.map((type) => {
                                         const Icon = CAMPAIGN_TYPE_ICONS[type.id] || Package;
+                                        const isActive = campaignType === type.id;
                                         return (
-                                            <button
-                                                key={type.id}
-                                                onClick={() => setCampaignType(type.id)}
-                                                className={`p-6 rounded-sm border text-left transition-all duration-300 group ${campaignType === type.id
-                                                        ? "bg-white/10 border-[#F97316] shadow-[0_0_20px_rgba(249,115,22,0.1)]"
-                                                        : "bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]"
-                                                    }`}
-                                            >
-                                                <Icon className={`w-8 h-8 mb-4 ${campaignType === type.id ? "text-[#F97316]" : "text-white/40 group-hover:text-white/60"}`} />
-                                                <h4 className="font-bold text-sm text-white mb-1">{type.name}</h4>
-                                                <p className="text-[10px] text-white/40">{type.description}</p>
+                                            <button key={type.id} onClick={() => setCampaignType(type.id)}
+                                                style={{
+                                                    ...cardStyle, padding: "22px 18px", cursor: "pointer", textAlign: "left",
+                                                    border: isActive ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.06)",
+                                                    backgroundColor: isActive ? `${ACCENT}08` : "rgba(255,255,255,0.02)",
+                                                }}>
+                                                <Icon style={{ width: 28, height: 28, color: isActive ? ACCENT : "#444", marginBottom: 12 }} />
+                                                <p style={{ fontSize: 14, fontWeight: 600, color: isActive ? "#fff" : "#ccc", marginBottom: 3 }}>{type.name}</p>
+                                                <p style={{ fontSize: 11, color: "#555" }}>{type.description}</p>
                                             </button>
                                         );
                                     })}
@@ -188,380 +207,310 @@ export default function CampaignEditorPage() {
 
                             {/* Brand Information */}
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Brand Information
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Input
-                                        label="Brand Name"
-                                        value={brandName}
-                                        onChange={(e) => setBrandName(e.target.value)}
-                                        placeholder="Your brand name"
-                                    />
-                                    <Input
-                                        label="Tagline"
-                                        value={tagline}
-                                        onChange={(e) => setTagline(e.target.value)}
-                                        placeholder="Your catchy tagline"
-                                    />
+                                <p style={sectionLabel}>Brand Information</p>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                    <div>
+                                        <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 6 }}>Brand Name</label>
+                                        <input value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="Your brand name" style={inputStyle} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 6 }}>Tagline</label>
+                                        <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="Your catchy tagline" style={inputStyle} />
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Duration */}
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Ad Duration
-                                </h3>
-                                <div className="flex gap-3">
-                                    {DURATION_OPTIONS.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            onClick={() => setDuration(option.value)}
-                                            className={`px-6 py-3 rounded-sm border text-sm font-medium transition-all duration-300 ${duration === option.value
-                                                    ? "bg-[#F97316] border-[#F97316] text-white shadow-lg shadow-[#F97316]/20"
-                                                    : "bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20 hover:text-white"
-                                                }`}
-                                        >
-                                            {option.label}
-                                        </button>
-                                    ))}
+                                <p style={sectionLabel}>Ad Duration</p>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    {DURATION_OPTIONS.map((opt) => {
+                                        const isActive = duration === opt.value;
+                                        return (
+                                            <button key={opt.value} onClick={() => setDuration(opt.value)}
+                                                style={{
+                                                    padding: "9px 22px", borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: "pointer",
+                                                    border: isActive ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.08)",
+                                                    backgroundColor: isActive ? ACCENT : "transparent",
+                                                    color: isActive ? "#000" : "#888",
+                                                    boxShadow: isActive ? `0 0 20px ${ACCENT}33` : "none",
+                                                    transition: "all 0.2s",
+                                                }}>
+                                                {opt.label}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Call to Action */}
+                            {/* CTA */}
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Call to Action
-                                </h3>
-                                <div className="flex flex-wrap gap-2 mb-6">
-                                    {CTA_TYPES.map((cta) => (
-                                        <button
-                                            key={cta.id}
-                                            onClick={() => {
-                                                setCtaType(cta.id);
-                                                if (cta.id !== "custom") setCtaText(cta.label);
-                                            }}
-                                            className={`px-4 py-2 rounded-sm text-[11px] uppercase tracking-widest font-medium transition-all duration-300 ${ctaType === cta.id
-                                                    ? "bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/30"
-                                                    : "bg-white/5 text-white/50 border border-white/10 hover:border-white/20 hover:text-white"
-                                                }`}
-                                        >
-                                            {cta.label}
-                                        </button>
-                                    ))}
+                                <p style={sectionLabel}>Call to Action</p>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                                    {CTA_TYPES.map((cta) => {
+                                        const isActive = ctaType === cta.id;
+                                        return (
+                                            <button key={cta.id} onClick={() => { setCtaType(cta.id); if (cta.id !== "custom") setCtaText(cta.label); }}
+                                                style={{
+                                                    padding: "7px 16px", borderRadius: 100, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                                                    border: isActive ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.08)",
+                                                    backgroundColor: isActive ? `${ACCENT}12` : "transparent",
+                                                    color: isActive ? ACCENT : "#888",
+                                                    transition: "all 0.2s",
+                                                }}>
+                                                {cta.label}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Input
-                                        label="Button Text"
-                                        value={ctaText}
-                                        onChange={(e) => setCtaText(e.target.value)}
-                                        placeholder="Shop Now"
-                                    />
-                                    <Input
-                                        label="Destination URL"
-                                        value={ctaUrl}
-                                        onChange={(e) => setCtaUrl(e.target.value)}
-                                        placeholder="https://yourstore.com/product"
-                                    />
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                    <div>
+                                        <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 6 }}>Button Text</label>
+                                        <input value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="Shop Now" style={inputStyle} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: 12, color: "#666", display: "block", marginBottom: 6 }}>Destination URL</label>
+                                        <input value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="https://yourstore.com/product" style={inputStyle} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
 
-                    {/* Products Tab */}
-                    <TabPanel isActive={activeTab === "products"}>
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-bold">
-                                    Products ({selectedProducts.length} selected)
-                                </h3>
-                                <Button variant="outline" size="sm">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Add Product
-                                </Button>
+                    {/* ────── PRODUCTS TAB ────── */}
+                    {activeTab === "products" && (
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                                <p style={{ ...sectionLabel, marginBottom: 0 }}>Products ({selectedProducts.length} selected)</p>
+                                <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: ACCENT, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
+                                    <Plus style={{ width: 14, height: 14 }} /> Add Product
+                                </button>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
                                 {DUMMY_PRODUCTS.map((product) => {
                                     const isSelected = selectedProducts.includes(product.id);
                                     return (
-                                        <Card
-                                            key={product.id}
-                                            hover
-                                            onClick={() => toggleProduct(product.id)}
-                                            className={`cursor-pointer transition-all duration-300 ${isSelected ? "ring-2 ring-[#F97316] bg-[#F97316]/5" : ""
-                                                }`}
-                                        >
-                                            <CardContent className="p-4">
-                                                <div className="flex gap-4">
-                                                    <div className="w-16 h-16 bg-white/5 rounded-sm overflow-hidden flex-shrink-0">
-                                                        {product.imageUrl ? (
-                                                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center">
-                                                                <Package className="w-6 h-6 text-white/20" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <h4 className="font-bold text-white text-sm line-clamp-1">{product.name}</h4>
-                                                            {isSelected && <Check className="w-5 h-5 text-[#F97316] flex-shrink-0" />}
-                                                        </div>
-                                                        <p className="text-lg font-black text-white mt-1">${product.price}</p>
-                                                        <Badge variant="default" size="sm" className="mt-2">{product.type}</Badge>
-                                                    </div>
+                                        <button key={product.id} onClick={() => toggleProduct(product.id)}
+                                            style={{
+                                                ...cardStyle, padding: 16, cursor: "pointer", textAlign: "left",
+                                                border: isSelected ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.06)",
+                                                backgroundColor: isSelected ? `${ACCENT}06` : "rgba(255,255,255,0.02)",
+                                            }}>
+                                            <div style={{ display: "flex", gap: 14 }}>
+                                                <div style={{ width: 56, height: 56, borderRadius: 10, overflow: "hidden", flexShrink: 0, backgroundColor: "rgba(255,255,255,0.04)" }}>
+                                                    {product.imageUrl
+                                                        ? <img src={product.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><Package style={{ width: 20, height: 20, color: "#333" }} /></div>}
                                                 </div>
-                                            </CardContent>
-                                        </Card>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                                                        <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</p>
+                                                        {isSelected && <Check style={{ width: 16, height: 16, color: ACCENT, flexShrink: 0 }} />}
+                                                    </div>
+                                                    <p style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>${product.price}</p>
+                                                    <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 100, backgroundColor: "rgba(255,255,255,0.06)", color: "#888", textTransform: "capitalize", marginTop: 6, display: "inline-block" }}>{product.type}</span>
+                                                </div>
+                                            </div>
+                                        </button>
                                     );
                                 })}
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
 
-                    {/* Assets Tab */}
-                    <TabPanel isActive={activeTab === "assets"}>
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-bold">
-                                    AI Assets ({selectedAssets.length} selected)
-                                </h3>
-                                <Button variant="outline" size="sm">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Generate New
-                                </Button>
+                    {/* ────── ASSETS TAB ────── */}
+                    {activeTab === "assets" && (
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                                <p style={{ ...sectionLabel, marginBottom: 0 }}>AI Assets ({selectedAssets.length} selected)</p>
+                                <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: ACCENT, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
+                                    <Plus style={{ width: 14, height: 14 }} /> Generate New
+                                </button>
                             </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
                                 {DUMMY_AI_ASSETS.map((asset) => {
                                     const isSelected = selectedAssets.includes(asset.id);
                                     return (
-                                        <Card
-                                            key={asset.id}
-                                            hover
-                                            onClick={() => toggleAsset(asset.id)}
-                                            className={`cursor-pointer overflow-hidden transition-all duration-300 ${isSelected ? "ring-2 ring-[#F97316] bg-[#F97316]/5" : ""
-                                                }`}
-                                        >
-                                            <div className="aspect-square bg-white/5 relative overflow-hidden">
-                                                {asset.imageUrl && (
-                                                    <img src={asset.imageUrl} alt={asset.name} className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
-                                                )}
+                                        <button key={asset.id} onClick={() => toggleAsset(asset.id)}
+                                            style={{
+                                                ...cardStyle, padding: 0, overflow: "hidden", cursor: "pointer", textAlign: "left",
+                                                border: isSelected ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.06)"
+                                            }}>
+                                            <div style={{ aspectRatio: "1", position: "relative", overflow: "hidden", backgroundColor: "rgba(255,255,255,0.03)" }}>
+                                                {asset.imageUrl && <img src={asset.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} />}
                                                 {isSelected && (
-                                                    <div className="absolute top-2 right-2">
-                                                        <div className="w-6 h-6 bg-[#F97316] rounded-sm flex items-center justify-center">
-                                                            <Check className="w-4 h-4 text-white" />
-                                                        </div>
+                                                    <div style={{ position: "absolute", top: 8, right: 8, width: 24, height: 24, borderRadius: 6, backgroundColor: ACCENT, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                        <Check style={{ width: 14, height: 14, color: "#000" }} />
                                                     </div>
                                                 )}
-                                                <div className="absolute bottom-2 left-2">
-                                                    <Badge variant="default" size="sm">{asset.type}</Badge>
-                                                </div>
+                                                <span style={{ position: "absolute", bottom: 8, left: 8, fontSize: 10, padding: "2px 8px", borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", color: "#ccc", textTransform: "capitalize" }}>{asset.type.replace("_", " ")}</span>
                                             </div>
-                                            <CardContent className="p-3">
-                                                <h4 className="font-bold text-white text-sm line-clamp-1">{asset.name}</h4>
-                                            </CardContent>
-                                        </Card>
+                                            <div style={{ padding: "10px 12px" }}>
+                                                <p style={{ fontSize: 13, fontWeight: 600, color: "#ccc", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{asset.name}</p>
+                                            </div>
+                                        </button>
                                     );
                                 })}
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
 
-                    {/* Style Tab */}
-                    <TabPanel isActive={activeTab === "style"}>
-                        <div className="space-y-10">
+                    {/* ────── STYLE TAB ────── */}
+                    {activeTab === "style" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Video Style
-                                </h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {VIDEO_STYLES.map((style) => (
-                                        <button
-                                            key={style.id}
-                                            onClick={() => setVideoStyle(style.id)}
-                                            className={`p-5 rounded-sm border text-left transition-all duration-300 ${videoStyle === style.id
-                                                    ? "bg-[#F97316]/10 border-[#F97316]/50 shadow-[0_0_20px_rgba(249,115,22,0.1)]"
-                                                    : "bg-white/[0.02] border-white/10 hover:border-white/20"
-                                                }`}
-                                        >
-                                            <h4 className="font-bold text-white mb-1">{style.name}</h4>
-                                            <p className="text-[10px] text-white/40">{style.description}</p>
-                                        </button>
-                                    ))}
+                                <p style={sectionLabel}>Video Style</p>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                                    {VIDEO_STYLES.map((style) => {
+                                        const isActive = videoStyle === style.id;
+                                        return (
+                                            <button key={style.id} onClick={() => setVideoStyle(style.id)}
+                                                style={{
+                                                    ...cardStyle, padding: "20px 18px", cursor: "pointer", textAlign: "left",
+                                                    border: isActive ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.06)",
+                                                    backgroundColor: isActive ? `${ACCENT}08` : "rgba(255,255,255,0.02)",
+                                                }}>
+                                                <p style={{ fontSize: 14, fontWeight: 600, color: isActive ? "#fff" : "#ccc", marginBottom: 3 }}>{style.name}</p>
+                                                <p style={{ fontSize: 11, color: "#555" }}>{style.description}</p>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-6 font-bold">
-                                    Camera Movement
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {CAMERA_MOVEMENTS.map((movement) => (
-                                        <button
-                                            key={movement.id}
-                                            onClick={() => setCameraMovement(movement.id)}
-                                            className={`px-4 py-2 rounded-sm text-sm font-medium transition-all duration-300 ${cameraMovement === movement.id
-                                                    ? "bg-[#F97316] text-white shadow-lg shadow-[#F97316]/20"
-                                                    : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
-                                                }`}
-                                        >
-                                            {movement.name}
-                                        </button>
-                                    ))}
+                                <p style={sectionLabel}>Camera Movement</p>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                    {CAMERA_MOVEMENTS.map((m) => {
+                                        const isActive = cameraMovement === m.id;
+                                        return (
+                                            <button key={m.id} onClick={() => setCameraMovement(m.id)}
+                                                style={{
+                                                    padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: "pointer",
+                                                    border: isActive ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.08)",
+                                                    backgroundColor: isActive ? ACCENT : "transparent",
+                                                    color: isActive ? "#000" : "#888",
+                                                    transition: "all 0.2s",
+                                                }}>
+                                                {m.name}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-4 font-bold">
-                                    Style Preview
-                                </h3>
-                                <div className="p-4 bg-white/5 rounded-sm border border-white/10">
-                                    <p className="text-sm text-white/50 font-mono">
-                                        Style: <span className="text-[#F97316]">{videoStyle}</span> |
-                                        Camera: <span className="text-[#F97316]">{cameraMovement.replace('_', ' ')}</span> |
-                                        Duration: <span className="text-[#F97316]">{duration}s</span>
+                                <p style={sectionLabel}>Style Preview</p>
+                                <div style={{ ...cardStyle, padding: "14px 18px" }}>
+                                    <p style={{ fontSize: 13, color: "#888", fontFamily: "monospace" }}>
+                                        Style: <span style={{ color: ACCENT }}>{videoStyle}</span> | Camera: <span style={{ color: ACCENT }}>{cameraMovement.replace("_", " ")}</span> | Duration: <span style={{ color: ACCENT }}>{duration}s</span>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
 
-                    {/* Preview Tab */}
-                    <TabPanel isActive={activeTab === "preview"}>
-                        <div className="space-y-6">
-                            <div className="aspect-video bg-black rounded-sm border border-white/10 relative overflow-hidden">
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <Wand2 className="w-16 h-16 text-white/20 mb-4" />
-                                    <p className="text-white/50">Video preview will appear here</p>
-                                    <p className="text-sm text-white/30 mt-2">Generate your ad to see the preview</p>
-                                </div>
-
+                    {/* ────── PREVIEW TAB ────── */}
+                    {activeTab === "preview" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                            <div style={{ aspectRatio: "16/9", borderRadius: 14, backgroundColor: "#080808", border: "1px solid rgba(255,255,255,0.06)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                <Wand2 style={{ width: 52, height: 52, color: "#222", marginBottom: 14 }} />
+                                <p style={{ fontSize: 15, color: "#555" }}>Video preview will appear here</p>
+                                <p style={{ fontSize: 12, color: "#333", marginTop: 4 }}>Generate your ad to see the preview</p>
                                 {ctaText && (
-                                    <div className="absolute bottom-6 right-6">
-                                        <button className="flex items-center gap-2 px-6 py-3 bg-[#F97316] text-white rounded-sm font-bold text-sm shadow-lg shadow-[#F97316]/30 hover:bg-[#EA580C] transition-colors">
-                                            {ctaText}
-                                            <ExternalLink className="w-4 h-4" />
+                                    <div style={{ position: "absolute", bottom: 24, right: 24 }}>
+                                        <button style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 24px", borderRadius: 10, border: "none", backgroundColor: ACCENT, color: "#000", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: `0 0 24px ${ACCENT}33` }}>
+                                            {ctaText} <ExternalLink style={{ width: 14, height: 14 }} />
                                         </button>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-sm bg-[#F97316]/20 flex items-center justify-center">
-                                                <Clock className="w-5 h-5 text-[#F97316]" />
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                                {[
+                                    { label: "Duration", value: `${duration}s`, icon: Clock, color: ACCENT },
+                                    { label: "Products", value: String(selectedProducts.length), icon: Package, color: "#22c55e" },
+                                    { label: "AI Assets", value: String(selectedAssets.length), icon: Users, color: "#a855f7" },
+                                ].map((stat) => {
+                                    const Icon = stat.icon;
+                                    return (
+                                        <div key={stat.label} style={{ ...cardStyle, padding: 16, display: "flex", alignItems: "center", gap: 14 }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: `${stat.color}14`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                <Icon style={{ width: 18, height: 18, color: stat.color }} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-white/40 uppercase tracking-widest">Duration</p>
-                                                <p className="text-xl font-black text-white">{duration}s</p>
+                                                <p style={{ fontSize: 11, color: "#555", textTransform: "uppercase", letterSpacing: "0.06em" }}>{stat.label}</p>
+                                                <p style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>{stat.value}</p>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-sm bg-[#10B981]/20 flex items-center justify-center">
-                                                <Package className="w-5 h-5 text-[#10B981]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] text-white/40 uppercase tracking-widest">Products</p>
-                                                <p className="text-xl font-black text-white">{selectedProducts.length}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-sm bg-blue-500/20 flex items-center justify-center">
-                                                <Users className="w-5 h-5 text-blue-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] text-white/40 uppercase tracking-widest">AI Assets</p>
-                                                <p className="text-xl font-black text-white">{selectedAssets.length}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                    );
+                                })}
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
 
-                    {/* Export Tab */}
-                    <TabPanel isActive={activeTab === "export"}>
-                        <div className="space-y-6">
-                            <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-bold">
-                                Select Export Formats
-                            </h3>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {EXPORT_FORMATS.map((format) => {
-                                    const isSelected = selectedFormats.includes(format.id);
-                                    const isVertical = format.aspectRatio === "9:16";
-                                    const isSquare = format.aspectRatio === "1:1";
-
+                    {/* ────── EXPORT TAB ────── */}
+                    {activeTab === "export" && (
+                        <div>
+                            <p style={{ ...sectionLabel, marginBottom: 20 }}>Select Export Formats</p>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                                {EXPORT_FORMATS.map((fmt) => {
+                                    const isSelected = selectedFormats.includes(fmt.id);
+                                    const isVertical = fmt.aspectRatio === "9:16";
+                                    const isSquare = fmt.aspectRatio === "1:1";
                                     return (
-                                        <Card
-                                            key={format.id}
-                                            hover
-                                            onClick={() => toggleFormat(format.id)}
-                                            className={`cursor-pointer transition-all duration-300 ${isSelected ? "ring-2 ring-[#F97316] bg-[#F97316]/5" : ""
-                                                }`}
-                                        >
-                                            <CardContent className="p-4">
-                                                <div className="flex items-start gap-4">
-                                                    <div className={`flex-shrink-0 bg-white/10 rounded-sm flex items-center justify-center ${isVertical ? "w-8 h-14" : isSquare ? "w-12 h-12" : "w-14 h-8"
-                                                        }`}>
-                                                        {isVertical ? (
-                                                            <Smartphone className="w-4 h-4 text-white/50" />
-                                                        ) : (
-                                                            <Monitor className="w-4 h-4 text-white/50" />
-                                                        )}
+                                        <button key={fmt.id} onClick={() => toggleFormat(fmt.id)}
+                                            style={{
+                                                ...cardStyle, padding: 16, cursor: "pointer", textAlign: "left",
+                                                border: isSelected ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.06)",
+                                                backgroundColor: isSelected ? `${ACCENT}06` : "rgba(255,255,255,0.02)",
+                                            }}>
+                                            <div style={{ display: "flex", gap: 14, alignItems: "start" }}>
+                                                <div style={{
+                                                    width: isVertical ? 28 : isSquare ? 40 : 48,
+                                                    height: isVertical ? 48 : isSquare ? 40 : 28,
+                                                    borderRadius: 6, backgroundColor: "rgba(255,255,255,0.06)",
+                                                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                                                }}>
+                                                    {isVertical ? <Smartphone style={{ width: 14, height: 14, color: "#555" }} /> : <Monitor style={{ width: 14, height: 14, color: "#555" }} />}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                                                        <div>
+                                                            <p style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>{fmt.name}</p>
+                                                            <p style={{ fontSize: 11, color: "#555", marginTop: 2 }}>{fmt.platform}</p>
+                                                        </div>
+                                                        {isSelected && <Check style={{ width: 16, height: 16, color: ACCENT, flexShrink: 0 }} />}
                                                     </div>
-
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <div>
-                                                                <h4 className="font-bold text-white">{format.name}</h4>
-                                                                <p className="text-[10px] text-white/40 mt-0.5">{format.platform}</p>
-                                                            </div>
-                                                            {isSelected && <Check className="w-5 h-5 text-[#F97316] flex-shrink-0" />}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            <Badge variant="default" size="sm">{format.aspectRatio}</Badge>
-                                                            <span className="text-[10px] text-white/30">Max {format.maxDuration}s</span>
-                                                        </div>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                                                        <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 100, backgroundColor: "rgba(255,255,255,0.06)", color: "#888" }}>{fmt.aspectRatio}</span>
+                                                        <span style={{ fontSize: 10, color: "#444" }}>Max {fmt.maxDuration}s</span>
                                                     </div>
                                                 </div>
-                                            </CardContent>
-                                        </Card>
+                                            </div>
+                                        </button>
                                     );
                                 })}
                             </div>
 
-                            <div className="pt-6 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-bold text-white">
-                                            {selectedFormats.length} format{selectedFormats.length !== 1 ? "s" : ""} selected
-                                        </p>
-                                        <p className="text-sm text-white/40">
-                                            Your ad will be exported in the selected formats
-                                        </p>
-                                    </div>
-                                    <Button size="lg" disabled={selectedFormats.length === 0}>
-                                        <Download className="w-4 h-4 mr-2" />
-                                        Export All
-                                    </Button>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                                <div>
+                                    <p style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{selectedFormats.length} format{selectedFormats.length !== 1 ? "s" : ""} selected</p>
+                                    <p style={{ fontSize: 12, color: "#555", marginTop: 2 }}>Your ad will be exported in the selected formats</p>
                                 </div>
+                                <button style={{
+                                    display: "flex", alignItems: "center", gap: 8, padding: "10px 24px", borderRadius: 10, border: "none",
+                                    backgroundColor: selectedFormats.length > 0 ? ACCENT : "rgba(255,255,255,0.06)",
+                                    color: selectedFormats.length > 0 ? "#000" : "#555",
+                                    fontSize: 13, fontWeight: 700, cursor: selectedFormats.length > 0 ? "pointer" : "default",
+                                    transition: "all 0.25s",
+                                }}>
+                                    <Download style={{ width: 15, height: 15 }} /> Export All
+                                </button>
                             </div>
                         </div>
-                    </TabPanel>
+                    )}
+
                 </div>
             </div>
         </div>

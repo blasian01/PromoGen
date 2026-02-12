@@ -159,7 +159,7 @@ export default function LoginPage() {
                         <Layers style={{ width: 18, height: 18, color: "#000" }} strokeWidth={2.5} />
                     </div>
                     <span style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em" }}>
-                        PromoGen
+                        Sociably
                     </span>
                 </div>
 
@@ -265,7 +265,7 @@ export default function LoginPage() {
                         >
                             <Layers style={{ width: 16, height: 16, color: "#000" }} strokeWidth={2.5} />
                         </div>
-                        <span style={{ fontSize: 18, fontWeight: 600 }}>PromoGen</span>
+                        <span style={{ fontSize: 18, fontWeight: 600 }}>Sociably</span>
                     </div>
 
                     {/* Heading */}
@@ -382,7 +382,7 @@ export default function LoginPage() {
                                 Email
                             </label>
                             <input
-                                type="email"
+                                type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
@@ -409,8 +409,8 @@ export default function LoginPage() {
                                 >
                                     Password
                                 </label>
-                                <a
-                                    href="#"
+                                <Link
+                                    href="/forgot-password"
                                     style={{
                                         fontSize: 12,
                                         color: "#7DD3FC",
@@ -419,7 +419,7 @@ export default function LoginPage() {
                                     }}
                                 >
                                     Forgot?
-                                </a>
+                                </Link>
                             </div>
                             <div style={{ position: "relative" }}>
                                 <input
@@ -504,8 +504,8 @@ export default function LoginPage() {
                         }}
                     >
                         Don&apos;t have an account?{" "}
-                        <a
-                            href="#"
+                        <Link
+                            href="/signup"
                             style={{
                                 color: "#7DD3FC",
                                 fontWeight: 600,
@@ -513,7 +513,7 @@ export default function LoginPage() {
                             }}
                         >
                             Start free
-                        </a>
+                        </Link>
                     </p>
 
                     <div

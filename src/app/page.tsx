@@ -204,7 +204,7 @@ export default function LandingPage() {
             <span
               style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em" }}
             >
-              PromoGen
+              Sociably
             </span>
           </div>
 
@@ -300,9 +300,9 @@ export default function LandingPage() {
             style={{
               position: "absolute",
               inset: 0,
-              opacity: 0.4,
+              opacity: 1,
               pointerEvents: "none",
-              zIndex: 1,
+              zIndex: 5,
             }}
           >
             <PhoneScene />
@@ -523,7 +523,7 @@ export default function LandingPage() {
                         border: "1px solid rgba(255, 255, 255, 0.06)",
                       }}
                     >
-                      app.promogen.io/dashboard
+                      app.sociably.io/dashboard
                     </div>
                   </div>
                 </div>
@@ -1599,7 +1599,7 @@ export default function LandingPage() {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  PromoGen
+                  Sociably
                 </span>
               </div>
               <div style={{ display: "flex", gap: 32 }}>
@@ -1630,7 +1630,7 @@ export default function LandingPage() {
                 color: "#333",
               }}
             >
-              <p>© 2025 PromoGen Inc. All rights reserved.</p>
+              <p>© 2025 Sociably Inc. All rights reserved.</p>
               <div
                 style={{
                   display: "flex",
